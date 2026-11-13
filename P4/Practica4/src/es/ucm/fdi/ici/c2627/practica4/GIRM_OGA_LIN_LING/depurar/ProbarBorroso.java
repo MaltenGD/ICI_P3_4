@@ -10,7 +10,7 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
  */
 public class ProbarBorroso {
 
-    static final String FCL = "bin/es/ucm/fdi/ici/c2627/practica4/GIRM_OGA_LIN_LING/mspacman-v0.fcl";
+    static final String FCL = "bin/es/ucm/fdi/ici/c2627/practica4/GIRM_OGA_LIN_LING/v1MsPacMan/mspacman-v1.fcl";
     static final String BLOQUE = "MsPacMan";
     static int fallos = 0;
 
@@ -20,18 +20,25 @@ public class ProbarBorroso {
         FunctionBlock fb = fis.getFunctionBlock(BLOQUE);
 
         //   nombre del caso                                               gana esperada   peligro comestible ppill ventaja
-        caso(fb, "1. Nada cerca: come tranquilamente",                     "comer",     150, 150, 150, -150);
-        caso(fb, "2. Peligro desesperado a 5 (encima): huir si o si",       "huir",        5, 150, 150, -150);
-        caso(fb, "3. Peligroso a 20 sin ppill: huir",                      "huir",       20, 150, 150, -150);
-        caso(fb, "4. Peligroso a 45: distancia media, todavía come",       "comer",      45, 150, 150, -150);
-        caso(fb, "5. Comestible alcanzable a 10, peligroso lejos: cazar",  "perseguir", 150,  10, 150, -150);
-        caso(fb, "6. Peligro a 25 y PPill a 8 (ventaja +17): a la PPill",  "irAPPill",   25, 150,   8,   17);
-        caso(fb, "7. Peligro encima a 5 y PPill a 8 (desesperado): huir",   "huir",        5, 150,   8,   -3);
+        caso(fb, "1. Nada cerca: come tranquilamente",
+        	     "comer", 150, 150, 150, -150, 0, 4);
 
+        	caso(fb, "2. Peligro extremo: huir",
+        	     "huir", 5, 150, 150, -150, 0, 4);
+
+        	caso(fb, "3. Varios fantasmas cerca",
+        	     "huir", 20, 150, 150, -150, 3, 4);
+
+        	caso(fb, "4. Power Pill como escape",
+        	     "irAPPill", 5, 150, 10, -5, 1, 4);
+
+        	caso(fb, "5. Ultimas Power Pills",
+        	     "irAPPill", 80, 150, 10, -70, 0, 2);
+        	
         // Curva de control según distancia al peligro
         System.out.println("\npeligro  salidas -> gana");
         for (int d = 0; d <= 100; d += 5) {
-            evaluar(fb, d, 150, 150, -150);
+            evaluar(fb, d, 150, 150, -150, 1, 4);
             System.out.printf("%5d   %s -> %s%n", d, salidas(fb), gana(fb));
         }
 
@@ -39,8 +46,9 @@ public class ProbarBorroso {
     }
 
     static void caso(FunctionBlock fb, String nombre, String esperada,
-                     double peligro, double comestible, double ppill, double ventaja) {
-        evaluar(fb, peligro, comestible, ppill, ventaja);
+                     double peligro, double comestible, double ppill, double ventaja, double perseguidores, double
+                     restantes) {
+        evaluar(fb, peligro, comestible, ppill, ventaja, perseguidores, restantes);
         String gana = gana(fb);
         StringBuilder activas = new StringBuilder();
         for (Rule r : fb.getRuleBlocks().values().iterator().next().getRules())
@@ -52,11 +60,23 @@ public class ProbarBorroso {
                 bien ? "BIEN" : "MAL ", nombre, gana, esperada, salidas(fb), activas);
     }
 
-    static void evaluar(FunctionBlock fb, double peligro, double comestible, double ppill, double ventaja) {
+    static void evaluar(
+            FunctionBlock fb,
+            double peligro,
+            double comestible,
+            double ppill,
+            double ventaja,
+            double perseguidores,
+            double restantes) {
+
         fb.setVariable("peligro", peligro);
         fb.setVariable("comestible", comestible);
         fb.setVariable("ppill", ppill);
         fb.setVariable("ventajaPPill", ventaja);
+
+        fb.setVariable("perseguidoresCerca", perseguidores);
+        fb.setVariable("ppillsRestantes", restantes);
+
         fb.evaluate();
     }
 

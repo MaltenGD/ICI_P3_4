@@ -11,8 +11,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.Ghosts;
-import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.MsPacMan;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts.Ghosts;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.MsPacMan;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v1MsPacMan.MsPacManv1;
 import pacman.controllers.GhostController;
 import pacman.controllers.PacmanController;
 import pacman.game.Game;
@@ -40,7 +41,7 @@ public class Comparar {
 
     static {
         MIS_PACMANS.put("v0", () -> new MsPacMan("mspacman-v0.fcl"));     // huir, comer y perseguir
-        MIS_PACMANS.put("v1", () -> new MsPacMan("mspacman-v1.fcl"));     // con la píldora de poder
+        MIS_PACMANS.put("v1", () -> new MsPacManv1("mspacman-v1.fcl"));     // con la píldora de poder
 
         MIS_FANTASMAS.put("v0", () -> new Ghosts("ghosts-v0.fcl"));       // perseguir o huir
         MIS_FANTASMAS.put("v1", () -> new Ghosts("ghosts-v1.fcl"));       // con la píldora de poder
@@ -58,7 +59,6 @@ public class Comparar {
     static final long SEMILLA = 1;            // la partida i usa la semilla SEMILLA + i
     static final int LIMITE_TURNOS = 4000;    // el mismo que el Executor
     static final int HILOS = Runtime.getRuntime().availableProcessors();
-
     static final AtomicInteger hechas = new AtomicInteger();   // para ir viendo el progreso
 
     public static void main(String[] args) throws Exception {

@@ -12,9 +12,9 @@
 ## Sesión 1 (Jueves 12 de noviembre) porteo del pacman de la P3
 
 
-Al revisar el proyecto de partida vimos que el `mspacman-v0.fcl` es una plantilla muy simplóna (solo 6 reglas de huir o comer sin píldoras de poder ni matices).
+Al revisar el proyecto de partida vimos que el `mspacman-v0.fcl` es una plantilla muy simplona (solo 6 reglas de huir o comer sin píldoras de poder ni matices).
 Decidimos que nuestra `v0`  iba a ser un porteo fiel de uno de los primeros pacman de la Práctica 3 y no una copia directa de la plantilla, este controlador agrega a la plantilla lo siguiente:
-1. **Peligro escalonado:** En la P3 el pacman diferencia entre peligro cercano general ($d < 25$) y peligro crítico o desesperado ($d \le 6$) donde huir era la mayor priridad.
+1. **Peligro escalonado:** En la P3 el pacman diferencia entre peligro cercano general ($d < 25$) y peligro crítico o desesperado ($d \le 6$) donde huir era la mayor prioridad.
 2. **Píldoras de poder con ventaja:** Comprobábamos si Pac-Man llegaba a la píldora antes que el fantasma. Si el fantasma estaba demasiado encima, no se arriesgaba y huía.
 3. **Criterio de caza estricto:** Solo perseguir a un fantasma comestible si daba tiempo a alcanzarlo antes de que volviese a ser peligroso ($tiempo > 2 \cdot dist + 2$).
 4. **Rematar:** Si un comestible estaba muy cerca, valía la pena rematarlo aunque hubiese peligro a distancia media.
@@ -59,7 +59,7 @@ Probamos también `VerPartida` con `TrazaBorrosa` conectada frente a los fantasm
 
 ### Resultados de la línea base (MsPacMan v0 - Porteo P3)
 
-Ejecutamos 300 partidas por rival frente a los cinco fantasmas de referencia (1500 partidas)
+Ejecutamos 300 partidas por rival frente a los cinco fantasmas de referencia (1500 partidas cada MsPacMan)
 
 #### Puntos obtenidos
 | rival | v0 ± error típico |
@@ -90,3 +90,88 @@ Ejecutamos 300 partidas por rival frente a los cinco fantasmas de referencia (15
 | Intermedio | 2.18 ± 0.11 |
 | Avanzado | 1.52 ± 0.09 |
 | **MEDIA (5)** | **2.78 ± 0.06** |
+
+## Sesión 2 (Viernes 13 de noviembre) · Realización de un nuevo controlador (MsPacMan v1 - MsPacMan v0)
+
+Elegimos crear una versión v1 porque En la v0 la variable ventajaPPil cambia muy rapido cuando pacman gira una esquina porque "desventaja" se solapa con "ventaja" en valores muy cercanos a 0, por lo que la accion de irAPPil y huir terminan estando muy juntas.
+Tambien, en el v0 no se estaba teniendo en cuenta el número de PowerPills que quedan, puede venir bien para que al final se prioricen las ultimas pildoras aisladas. Además, estábamos en duda de que se tuviera en cuenta la cantidad de fantasmas cerca del pacman, porque antes era al más cercano, provocando que MsPacMan pudiera huir hacia la direccion por la que le viene otro.
+Para ello, sería conveniente añadir a MsPacManInput una variable tipo perseguidoresCerca(), relajando la exigencia de la ventaja en la power pill para buscarla como salvaguardia en caso de huir a la desesperada.
+
+## Problemas de la integración de este v1
+
+1. **Variables inexistentes en el FCL:** al añadir `perseguidoresCerca` y `ppillsRestantes` a Java, el motor devolvía `No such variable`. Las entradas también tenían que estar declaradas en el archivo FCL correspondiente.
+2. **Valores nulos:** detectamos que algunas entradas llegaban como `null`, provocando excepciones al evaluar la lógica borrosa en estos primeros casos.
+3. **Ruta de los archivos FCL:** comprobamos que los archivos se cargaban correctamente desde `bin/`. Para reutilizar la misma ruta entre Ms. Pac-Man y los fantasmas, compartimos la constante `FCL_PATH` de `MsPacMan`.
+4. **Error de carga del motor:** al utilizar una ruta incorrecta, `FIS.load()` devolvía `null`, provocando posteriormente un `NullPointerException`.
+5. **Controlador de fantasmas:** adaptamos también su constructor para utilizar la ruta compartida y cargar correctamente sus archivos FCL.
+
+### Verificación unitaria con `ProbarBorroso`
+
+Realizamos cinco pruebas unitarias con diferentes situaciones para comprobar el comportamiento de las nuevas reglas:
+
+1. Nada cerca: gana `comer` (8,7 frente a 1,3). Se activan R26 y R27. [BIEN]
+2. Peligro extremo: gana `huir` (8,7 frente a 1,3). Se activan R1, R2 y R3. [BIEN]
+3. Varios fantasmas cerca: gana `huir` (8,7 frente a 1,3). Se activan R8, R9 y R10. [BIEN]
+4. Power Pill como escape: gana `irAPPill` (8,7), por delante de huir (5,0). Se activan R4, R5, R6 y R7. [BIEN]
+5. Últimas Power Pills: gana `irAPPill` (8,6), por delante de comer (1,4) y huir (1,4). Se activan R22, R35 y R27. [BIEN]
+
+Todos los casos dieron el resultado esperado.
+
+### Ampliación de reglas en mspacman-v1.fcl
+
+Pasamos de las 9 reglas a 35 reglas borrosas, organizadas en varios bloques:
+
+- **Supervivencia ante peligro extremo (R1-R7)**: Misma lógica que v0.
+- **Múltiples fantasmas peligrosos (R8-R15):** Incorporamos el número de perseguidores cercanos. Si hay muchos fantasmas, la huida será de prioridad máxima y se reduce la intención de comer y perseguir.
+- **Power Pills como vía de escape (R16-R21)**: Metemos decisiones basadas en la ventaja calculada. Si Pac-Man puede alcanzar una Power Pill antes que los fantasmas, aumenta la prioridad de dirigirse hacia ella. Si la ventaja no está clara y hay varios perseguidores, se prioriza huir.
+- **Administración de Power Pills (R22-R24)**: Tenemos en cuenta cuántas píldoras quedan en el mapa. Cuando quedan pocas, aumenta la prioridad de recogerlas, siempre que el nivel de peligro lo permita.
+- **Comportamiento de comida (R25-R28)**: Se mantiene la prioridad de comer cuando no existe peligro importante, reduciendo esta acción cuando hay fantasmas comestibles que perseguir.
+- **Persecución de fantasmas comestibles (R29-R35)**: Ampliamos la lógica de caza. Se persigue con intensidad cuando no hay peligro cercano, y se reduce progresivamente la intención de perseguir cuando hay varios fantasmas peligrosos alrededor.
+
+
+Uso de IA: Se utilizó IA como apoyo para diseñar y revisar los problemas que fueron surgiendo con la nueva versión para comprobarlo con el motor borroso. Para la incorporación de perseguidoresCerca para considerar varios fantasmas peligrosos y ppillsRestantes para conocer cuántas Power Pills quedan en el mapa. Ayuda a construir el mspacman-v1.fcl que incorpora los nuevos criterios de supervivencia, gestión de Power Pills y persecución.
+
+### Resultados de la línea base (MsPacMan v1 - MsPacMan v0)
+
+Ejecutamos 300 partidas por rival frente a los cinco fantasmas de referencia (1500 partidas cada MsPacMan)
+
+#### Puntos obtenidos
+rival                        v0               v1         D   2·ET_D
+Random               3866 ± 110       4348 ± 109      +482      309  mejor
+Aggressive           3233 ± 106       3422 ± 116      +188      315  ruido
+Basico                2124 ± 67        2805 ± 73      +680      198  mejor
+Intermedio            2176 ± 71        2555 ± 79      +379      212  mejor
+Avanzado              1789 ± 49        1960 ± 52      +171      143  mejor
+------------------------------------------------------------------------
+MEDIA (5)             2638 ± 37        3018 ± 40      +380      109  mejor
+v1 es mejor contra 4 rivales, peor contra 0 y no se distingue contra 1.
+
+#### Turnos por vida
+rival                        v0               v1         D   2·ET_D
+Random                 671 ± 27         731 ± 29       +60       79  ruido
+Aggressive             797 ± 71         989 ± 77      +192      210  ruido
+Basico                  278 ± 7          394 ± 9      +116       23  mejor
+Intermedio              241 ± 7         309 ± 20       +68       43  mejor
+Avanzado               362 ± 34         333 ± 24       -29       84  ruido
+------------------------------------------------------------------------
+MEDIA (5)              470 ± 17         551 ± 18       +81       49  mejor
+v1 es mejor contra 2 rivales, peor contra 0 y no se distingue contra 3.
+
+#### Fantasmas comidos
+rival                        v0               v1         D   2·ET_D
+Random              4,07 ± 0,15      4,82 ± 0,15     +0,75     0,42  mejor
+Aggressive          3,73 ± 0,14      4,11 ± 0,16     +0,39     0,43  ruido
+Basico              2,18 ± 0,11      3,18 ± 0,12     +0,99     0,33  mejor
+Intermedio          2,27 ± 0,11      2,71 ± 0,12     +0,45     0,33  mejor
+Avanzado            1,65 ± 0,09      1,94 ± 0,09     +0,30     0,26  mejor
+------------------------------------------------------------------------
+MEDIA (5)           2,78 ± 0,06      3,35 ± 0,06     +0,57     0,16  mejor
+v1 es mejor contra 4 rivales, peor contra 0 y no se distingue contra 1.
+
+## Conclusión de la sesión
+Los resultados de esta primera ampliación son positivos:
+La puntuación media aumenta de 2638 a 3018 puntos (+380).
+Los turnos por vida aumentan de 470 a 551 (+81).
+Los fantasmas comidos aumentan de 2,78 a 3,35 (+0,57).
+Las pruebas unitarias terminan con los cinco escenarios correctos.
+La mejora que más se nota es que el controlador consigue combinar mejor la supervivencia con la caza de fantasmas comestibles, sin limitarse a huir constantemente ante cualquier situación de peligro. Decidiremos conservar esta versión como nuestra entrega y nuevo modelo para futuras versiones.

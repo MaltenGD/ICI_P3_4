@@ -1,8 +1,9 @@
-package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING;
+package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman;
 
 import es.ucm.fdi.ici.Action;
-import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.MsPacManInput;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.MaxActionSelector;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.actions.ComerAction;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.MsPacManInput;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.actions.HuirAction;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.actions.IrAPPillAction;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.actions.PerseguirAction;
@@ -14,7 +15,7 @@ import pacman.game.Game;
 public class MsPacMan extends PacmanController {
 
     // Una ruta del disco, no del classpath: Eclipse copia el .fcl a bin/ y lanza desde la carpeta del proyecto
-    static final String FCL_PATH = "bin/es/ucm/fdi/ici/c2627/practica4/GIRM_OGA_LIN_LING/";
+    public static final String FCL_PATH = "bin/es/ucm/fdi/ici/c2627/practica4/GIRM_OGA_LIN_LING/mspacman/";
 
     private final FuzzyEngine motor;
 

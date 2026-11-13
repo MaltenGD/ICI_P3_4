@@ -1,5 +1,5 @@
-import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.MsPacMan;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.depurar.TrazaBorrosa;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.MsPacMan;
 import pacman.Executor;
 
 /** Una partida en pantalla, con la traza borrosa de Ms. Pac-Man en la consola. */

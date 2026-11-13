@@ -1,11 +1,13 @@
-package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING;
+package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts;
 
 import java.util.EnumMap;
 
 import es.ucm.fdi.ici.Action;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.MaxActionSelector;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts.GhostsInput;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts.actions.HuirAction;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts.actions.PerseguirAction;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.MsPacMan;
 import es.ucm.fdi.ici.fuzzy.FuzzyEngine;
 import pacman.controllers.GhostController;
 import pacman.game.Constants.GHOST;

@@ -1,0 +1,348 @@
+FUNCTION_BLOCK MsPacMan
+
+VAR_INPUT
+   peligro : REAL;
+   comestible : REAL;
+   ppill : REAL;
+   ventajaPPill : REAL;
+   perseguidoresCerca : REAL;
+   ppillsRestantes : REAL;
+END_VAR
+
+VAR_OUTPUT
+   comer : REAL;
+   huir : REAL;
+   perseguir : REAL;
+   irAPPill : REAL;
+END_VAR
+
+// 1. PELIGRO
+
+FUZZIFY peligro
+   TERM encima := (0, 1) (6, 1) (15, 0);
+   TERM cerca := (10, 0) (20, 1) (35, 0);
+   TERM media := trian 25 50 75;
+   TERM lejos := (60, 0) (85, 1) (150, 1);
+END_FUZZIFY
+
+
+// 2. FANTASMAS COMESTIBLES
+
+FUZZIFY comestible
+   TERM cerca := (0, 1) (15, 1) (35, 0);
+   TERM media := trian 20 45 70;
+   TERM lejos := (55, 0) (80, 1) (150, 1);
+END_FUZZIFY
+
+
+// 3. POWER PILL MAS CERCANA
+
+FUZZIFY ppill
+   TERM cerca := (0, 1) (15, 1) (35, 0);
+   TERM media := trian 20 45 70;
+   TERM lejos := (55, 0) (80, 1) (150, 1);
+END_FUZZIFY
+
+
+// 4. VENTAJA POWER PILL
+// Se introduce una zona equilibrada para reducir
+// los cambios bruscos cuando la ventaja esta cerca de cero.
+
+FUZZIFY ventajaPPill
+   TERM desventaja := (-150, 1) (-30, 1) (-15, 0);
+   TERM equilibrada := (-25, 0) (0, 1) (25, 0);
+   TERM ventaja := (15, 0) (30, 1) (150, 1);
+END_FUZZIFY
+
+
+// 5. PERSEGUIDORES CERCANOS
+// Numero de fantasmas peligrosos a menos de 35 pasos.
+
+FUZZIFY perseguidoresCerca
+   TERM ninguno := (0, 1) (0.5, 0);
+   TERM pocos := (0, 0) (1, 1) (2, 0);
+   TERM varios := (1, 0) (2, 1) (3, 0);
+   TERM muchos := (2, 0) (3, 1) (4, 1);
+END_FUZZIFY
+
+
+// 6. POWER PILLS RESTANTES
+
+FUZZIFY ppillsRestantes
+   TERM ninguna := (0, 1) (0.5, 0);
+   TERM pocas := (0, 0) (1, 1) (2, 1) (3, 0);
+   TERM algunas := (2, 0) (3, 1) (4, 0);
+   TERM muchas := (3, 0) (4, 1);
+END_FUZZIFY
+
+
+// 7. SALIDAS
+
+DEFUZZIFY comer
+   TERM poco := (0, 1) (4, 0);
+   TERM algo := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY huir
+   TERM poco := (0, 1) (4, 0);
+   TERM algo := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY perseguir
+   TERM poco := (0, 1) (4, 0);
+   TERM algo := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY irAPPill
+   TERM poco := (0, 1) (4, 0);
+   TERM algo := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+
+RULEBLOCK reglas
+
+   AND : MIN;
+   ACT : MIN;
+   ACCU : MAX;
+
+   // ==========================================
+   // A. SUPERVIVENCIA: PELIGRO EXTREMO
+   // ==========================================
+
+   RULE 1 : IF peligro IS encima AND ppill IS NOT cerca
+            THEN huir IS mucho;
+
+   RULE 2 : IF peligro IS encima AND ppill IS NOT cerca
+            THEN comer IS poco;
+
+   RULE 3 : IF peligro IS encima AND ppill IS NOT cerca
+            THEN perseguir IS poco;
+
+   // Si hay una Power Pill cercana, utilizarla
+   // como alternativa de supervivencia.
+
+   RULE 4 : IF peligro IS encima AND ppill IS cerca
+            THEN irAPPill IS mucho;
+
+   RULE 5 : IF peligro IS encima AND ppill IS cerca
+            THEN huir IS algo;
+
+   RULE 6 : IF peligro IS encima AND ppill IS cerca
+            THEN comer IS poco;
+
+   RULE 7 : IF peligro IS encima AND ppill IS cerca
+            THEN perseguir IS poco;
+
+
+   // ==========================================
+   // B. MULTIPLES FANTASMAS PELIGROSOS
+   // ==========================================
+
+   // Muchos fantasmas: prioridad máxima a sobrevivir.
+
+RULE 8 : IF perseguidoresCerca IS muchos
+         THEN huir IS mucho;
+         
+   RULE 9 : IF perseguidoresCerca IS muchos
+            THEN perseguir IS poco;
+
+   RULE 10 : IF perseguidoresCerca IS muchos
+             THEN comer IS poco;
+
+   // Varios fantasmas con peligro cercano.
+
+   RULE 11 : IF perseguidoresCerca IS varios
+             AND peligro IS cerca
+             THEN huir IS mucho;
+
+   RULE 12 : IF perseguidoresCerca IS varios
+             AND peligro IS cerca
+             THEN perseguir IS poco;
+
+   // Varios fantasmas con peligro medio:
+   // huir, pero sin abandonar completamente la comida.
+
+   RULE 13 : IF perseguidoresCerca IS varios
+             AND peligro IS media
+             THEN huir IS algo;
+
+   // Pocos perseguidores: huida moderada.
+
+   RULE 14 : IF perseguidoresCerca IS pocos
+             AND peligro IS cerca
+             THEN huir IS mucho;
+
+   RULE 15 : IF perseguidoresCerca IS pocos
+             AND peligro IS cerca
+             THEN comer IS poco;
+
+
+   // ==========================================
+   // C. POWER PILLS COMO ESCAPE
+   // ==========================================
+
+   // Ventaja clara: ir directamente a la píldora.
+
+   RULE 16 : IF peligro IS cerca
+             AND ppill IS cerca
+             AND ventajaPPill IS ventaja
+             THEN irAPPill IS mucho;
+
+   RULE 17 : IF peligro IS cerca
+             AND ppill IS cerca
+             AND ventajaPPill IS ventaja
+             THEN huir IS poco;
+
+   // Ventaja equilibrada: buscar la píldora
+   // únicamente si no hay demasiados perseguidores.
+
+   RULE 18 : IF peligro IS cerca
+             AND ppill IS cerca
+             AND ventajaPPill IS equilibrada
+             AND perseguidoresCerca IS ninguno
+             THEN irAPPill IS mucho;
+
+   RULE 19 : IF peligro IS cerca
+             AND ppill IS cerca
+             AND ventajaPPill IS equilibrada
+             AND perseguidoresCerca IS pocos
+             THEN irAPPill IS algo;
+
+   // Si hay varios perseguidores, no arriesgarse
+   // con una Power Pill cuya ventaja no está clara.
+
+   RULE 20 : IF peligro IS cerca
+             AND ppill IS cerca
+             AND ventajaPPill IS equilibrada
+             AND perseguidoresCerca IS varios
+             THEN huir IS mucho;
+
+   // Power Pill a distancia media:
+   // solo merece la pena desviarse si hay ventaja.
+
+   RULE 21 : IF peligro IS cerca
+             AND ppill IS media
+             AND ventajaPPill IS ventaja
+             THEN irAPPill IS algo;
+
+
+   // ==========================================
+   // D. ADMINISTRACIÓN DE POWER PILLS
+   // ==========================================
+
+   // Pocas píldoras: aumentar la prioridad de recogerlas,
+   // pero solamente cuando no existe peligro cercano.
+
+   RULE 22 : IF ppillsRestantes IS pocas
+             AND ppill IS cerca
+             AND peligro IS lejos
+             THEN irAPPill IS mucho;
+
+	// Priorizar las últimas Power Pills frente a comer.
+	RULE 35 : IF ppillsRestantes IS pocas
+	          AND ppill IS cerca
+	          AND peligro IS lejos
+	          THEN comer IS poco;
+
+   RULE 23 : IF ppillsRestantes IS pocas
+             AND ppill IS media
+             AND peligro IS lejos
+             THEN irAPPill IS algo;
+
+   // Si quedan pocas píldoras y hay peligro medio,
+   // recogerlas únicamente si tenemos ventaja.
+
+   RULE 24 : IF ppillsRestantes IS pocas
+             AND ppill IS cerca
+             AND peligro IS media
+             AND ventajaPPill IS ventaja
+             THEN irAPPill IS mucho;
+
+
+   // ==========================================
+   // E. COMER
+   // ==========================================
+
+   // Peligro medio: mantener una conducta equilibrada.
+
+   RULE 25 : IF peligro IS media
+             AND comestible IS lejos
+             THEN comer IS algo;
+
+   // Sin peligro: priorizar comer si no hay
+   // fantasmas comestibles que podamos cazar.
+
+	RULE 26 : IF peligro IS lejos
+	          AND comestible IS lejos
+	          AND ppillsRestantes IS NOT pocas
+	          THEN comer IS mucho;
+
+   RULE 27 : IF peligro IS lejos
+             THEN huir IS poco;
+
+   // No perseguir y comer simultáneamente con
+   // la misma intensidad.
+
+   RULE 28 : IF peligro IS lejos
+             AND comestible IS cerca
+             THEN comer IS poco;
+
+
+   // ==========================================
+   // F. PERSEGUIR FANTASMAS COMESTIBLES
+   // ==========================================
+
+   // Caza segura: no hay peligro cercano.
+
+   RULE 29 : IF comestible IS cerca
+             AND peligro IS NOT cerca
+             AND peligro IS NOT encima
+             THEN perseguir IS mucho;
+
+   RULE 30 : IF comestible IS cerca
+             AND peligro IS NOT cerca
+             AND peligro IS NOT encima
+             THEN comer IS poco;
+
+   // Peligro medio: perseguir únicamente si
+   // no hay perseguidores peligrosos cerca.
+
+   RULE 31 : IF comestible IS cerca
+             AND peligro IS media
+             AND perseguidoresCerca IS ninguno
+             THEN perseguir IS mucho;
+
+   // Con pocos perseguidores, todavía podemos
+   // intentar cazar, pero con menor prioridad.
+
+   RULE 32 : IF comestible IS cerca
+             AND peligro IS media
+             AND perseguidoresCerca IS pocos
+             THEN perseguir IS algo;
+
+   // Con varios o muchos perseguidores,
+   // abandonar la caza.
+
+   RULE 33 : IF comestible IS cerca
+             AND perseguidoresCerca IS varios
+             THEN perseguir IS poco;
+
+   RULE 34 : IF comestible IS cerca
+             AND perseguidoresCerca IS muchos
+             THEN perseguir IS poco;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
