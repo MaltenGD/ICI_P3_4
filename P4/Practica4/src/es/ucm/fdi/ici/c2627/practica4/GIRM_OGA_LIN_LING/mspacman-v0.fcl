@@ -1,0 +1,110 @@
+// Ms. Pac-Man · v0: Porteo fiel de la lógica de la Práctica 3
+// Variables de entrada: peligro, comestible, ppill, ventajaPPill
+// Acciones: comer, huir, perseguir, irAPPill
+
+FUNCTION_BLOCK MsPacMan
+
+VAR_INPUT
+   peligro : REAL;         // distancia en pasos (0 a 150)
+   comestible : REAL;      // distancia a comestible alcanzable a tiempo (0 a 150)
+   ppill : REAL;           // distancia a la pildora de poder mas cercana (0 a 150)
+   ventajaPPill : REAL;    // peligro - ppill (-150 a +150)
+END_VAR
+
+VAR_OUTPUT
+   comer : REAL;           // prioridad de comer (0 a 10)
+   huir : REAL;            // prioridad de huir (0 a 10)
+   perseguir : REAL;       // prioridad de perseguir (0 a 10)
+   irAPPill : REAL;        // prioridad de ir a la pildora de poder (0 a 10)
+END_VAR
+
+FUZZIFY peligro
+   TERM encima := (0, 1) (6, 1) (15, 0);
+   TERM cerca := (10, 0) (20, 1) (35, 0);
+   TERM media := trian 25 50 75;
+   TERM lejos := (60, 0) (85, 1) (150, 1);
+END_FUZZIFY
+
+FUZZIFY comestible
+   TERM cerca := (0, 1) (15, 1) (35, 0);
+   TERM media := trian 20 45 70;
+   TERM lejos := (55, 0) (80, 1) (150, 1);
+END_FUZZIFY
+
+FUZZIFY ppill
+   TERM cerca := (0, 1) (15, 1) (35, 0);
+   TERM media := trian 20 45 70;
+   TERM lejos := (55, 0) (80, 1) (150, 1);
+END_FUZZIFY
+
+FUZZIFY ventajaPPill
+   TERM desventaja := (-150, 1) (-10, 1) (0, 0);
+   TERM ventaja    := (-2, 0) (10, 1) (150, 1);
+END_FUZZIFY
+
+DEFUZZIFY comer
+   TERM poco  := (0, 1) (4, 0);
+   TERM algo  := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY huir
+   TERM poco  := (0, 1) (4, 0);
+   TERM algo  := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY perseguir
+   TERM poco  := (0, 1) (4, 0);
+   TERM algo  := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY irAPPill
+   TERM poco  := (0, 1) (4, 0);
+   TERM algo  := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+RULEBLOCK reglas
+   AND : MIN;
+   ACT : MIN;
+   ACCU : MAX;
+
+   // 1. Huida desesperada cuando el fantasma esta encima (P3: peligro <= 6)
+   RULE 1 : IF peligro IS encima THEN huir IS mucho, comer IS poco;
+   RULE 2 : IF peligro IS encima THEN irAPPill IS poco;
+
+   // 2. Huida estandar con peligro cercano pero sin estar encima
+   RULE 3 : IF peligro IS cerca THEN huir IS mucho, comer IS poco;
+
+   // 3. Modulacion de comida y huida en distancias medias y lejanas
+   RULE 4 : IF peligro IS media THEN comer IS algo;
+   RULE 5 : IF peligro IS lejos THEN comer IS mucho, huir IS poco;
+
+   // 4. Poder con ventaja (P3: peligro cerca y llego a la ppill antes que el fantasma)
+   RULE 6 : IF peligro IS cerca AND ppill IS cerca AND ventajaPPill IS ventaja
+            THEN irAPPill IS mucho, huir IS poco;
+
+   // 5. Caza estandar (P3: sin peligro y fantasma comestible alcanzable cerca)
+   RULE 7 : IF comestible IS cerca AND peligro IS NOT cerca AND peligro IS NOT encima
+            THEN perseguir IS mucho, comer IS poco;
+
+   // 6. Rematar antes de huir (P3: comestible muy cerca aunque haya peligro a distancia media)
+   RULE 8 : IF comestible IS cerca AND peligro IS media
+            THEN perseguir IS mucho, comer IS poco;
+
+   // 7. Modulacion por defecto para no descuidar comer
+   RULE 9 : IF peligro IS NOT cerca AND peligro IS NOT encima AND comestible IS lejos
+            THEN comer IS mucho;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK

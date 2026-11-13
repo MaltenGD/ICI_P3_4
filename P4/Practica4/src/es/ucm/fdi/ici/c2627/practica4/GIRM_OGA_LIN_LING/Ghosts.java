@@ -1,11 +1,11 @@
-package es.ucm.fdi.ici.c2627.practica4.grupoYY;
+package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING;
 
 import java.util.EnumMap;
 
 import es.ucm.fdi.ici.Action;
-import es.ucm.fdi.ici.c2627.practica4.grupoYY.ghosts.GhostsInput;
-import es.ucm.fdi.ici.c2627.practica4.grupoYY.ghosts.actions.HuirAction;
-import es.ucm.fdi.ici.c2627.practica4.grupoYY.ghosts.actions.PerseguirAction;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts.GhostsInput;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts.actions.HuirAction;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts.actions.PerseguirAction;
 import es.ucm.fdi.ici.fuzzy.FuzzyEngine;
 import pacman.controllers.GhostController;
 import pacman.game.Constants.GHOST;
@@ -17,13 +17,13 @@ public class Ghosts extends GhostController {
     private final EnumMap<GHOST, FuzzyEngine> motores = new EnumMap<>(GHOST.class);
 
     public Ghosts() {
-        this("ghosts-v0.fcl");                    // la versión que va al concurso
+        this("ghosts-v0.fcl");                    // la versiÃ³n que va al concurso
     }
 
     /** Un motor por fantasma, todos con el mismo .fcl: cada uno con sus acciones y sus valores. */
     public Ghosts(String ficheroFcl) {
-        setName("Ghosts YY");
-        setTeam("Grupo YY");
+        setName("Ghosts GIRM_OGA_LIN_LING");
+        setTeam("GIRM_OGA_LIN_LING");
         for (GHOST g : GHOST.values()) {
             Action[] acciones = { new PerseguirAction(g), new HuirAction(g) };
             motores.put(g, new FuzzyEngine(g.name(), MsPacMan.FCL_PATH + ficheroFcl, "Ghost",

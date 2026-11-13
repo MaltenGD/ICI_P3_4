@@ -11,8 +11,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import es.ucm.fdi.ici.c2627.practica4.grupoYY.Ghosts;
-import es.ucm.fdi.ici.c2627.practica4.grupoYY.MsPacMan;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.Ghosts;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.MsPacMan;
 import pacman.controllers.GhostController;
 import pacman.controllers.PacmanController;
 import pacman.game.Game;
@@ -46,8 +46,8 @@ public class Comparar {
         MIS_FANTASMAS.put("v1", () -> new Ghosts("ghosts-v1.fcl"));       // con la píldora de poder
 
         // Si queréis más rivales, aquí, y desde el principio: los mismos para todas las versiones.
-        // RIVALES_FANTASMAS.put("P3 nuestros", es.ucm.fdi.ici.c2627.practica3.grupoYY.Ghosts::new);
-        // RIVALES_PACMANS.put("P3 nuestra", es.ucm.fdi.ici.c2627.practica3.grupoYY.MsPacMan::new);
+        // RIVALES_FANTASMAS.put("P3 nuestros", es.ucm.fdi.ici.c2627.practica3.GIRM_OGA_LIN_LING.Ghosts::new);
+        // RIVALES_PACMANS.put("P3 nuestra", es.ucm.fdi.ici.c2627.practica3.GIRM_OGA_LIN_LING.MsPacMan::new);
     }
 
     // ---- 3. Cómo se mide ----------------------------------------------------

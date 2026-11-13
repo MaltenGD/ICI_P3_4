@@ -1,4 +1,4 @@
-package es.ucm.fdi.ici.c2627.practica4.grupoYY.depurar;
+package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.depurar;
 
 import java.lang.reflect.Field;
 import java.util.Collection;

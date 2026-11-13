@@ -1,4 +1,4 @@
-package es.ucm.fdi.ici.c2627.practica4.grupoYY;
+package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING;
 
 import java.util.HashMap;
 

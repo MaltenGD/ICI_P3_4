@@ -1,4 +1,4 @@
-package es.ucm.fdi.ici.c2627.practica4.grupoYY.mspacman.actions;
+package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.actions;
 
 import es.ucm.fdi.ici.Action;
 import pacman.game.Constants.DM;
