@@ -40,8 +40,41 @@ Entre otras más y cambiar esos DEFUZZIFY que contenían mayúsculas ya que la n
 
 ---
 
-## Sesión 2 (Domingo 15 de noviembre) · Crear ControlarPillsAction y adaptar verPartida para ver su TrazaBorrosa
+## Sesión 2 (Domingo 15 de noviembre) · Crear ControlarPillsAction y adaptar los ejecutores
 
-Vimos que existía en la anterior práctica una salida que al final ,al parecer, se destartó pero lo integramos para esta, su objetivo es ir hacia la píldora más cercana y su no quedan entonces persiguen a Ms.Pac-Man, sabemos que es una acción bastante arriesgada pero queríamos probrar con ella.
+Vimos que existía en la anterior práctica una salida que al final ,al parecer, se destartó pero lo integramos para esta, su objetivo es ir hacia la píldora más cercana y si no quedan entonces persiguen a Ms.Pac-Man, sabemos que es una acción bastante arriesgada pero queríamos probrar con ella.
+
+Adaptamos los ejecutores de Comparar y verPartida para ver sus trazas además de ProbarBorroso para los casos.
 
 ### Resultados de la línea base (v0Ghosts - Porteo P3)
+
+```
+300 partidas por versión y rival, semillas 1 a 300, comparando fantasmas.
+
+== puntos: v0 frente a anterior (menos es mejor) ==
+rival                  anterior               v0         D   2·ET_D
+Basico               4218 ± 130        2208 ± 59     -2010      286  mejor
+Intermedio           9192 ± 148       4343 ± 151     -4849      423  mejor
+Avanzado            10443 ± 157       8297 ± 192     -2145      496  mejor
+------------------------------------------------------------------------
+MEDIA (3)             7951 ± 84        4949 ± 84     -3002      237  mejor
+v0 es mejor contra 3 rivales, peor contra 0 y no se distingue contra 0.
+
+== turnos por vida: v0 frente a anterior (menos es mejor) ==
+rival                  anterior               v0         D   2·ET_D
+Basico                 737 ± 37        1742 ± 93     +1005      199  peor
+Intermedio            2556 ± 76        2780 ± 83      +224      224  peor
+Avanzado              3673 ± 47        3081 ± 71      -592      170  mejor
+------------------------------------------------------------------------
+MEDIA (3)             2322 ± 32        2535 ± 48      +212      115  peor
+v0 es mejor contra 1 rivales, peor contra 2 y no se distingue contra 0.
+
+== fantasmas comidos: v0 frente a anterior (menos es mejor) ==
+rival                  anterior               v0         D   2·ET_D
+Basico              4,12 ± 0,17      1,86 ± 0,09     -2,26     0,39  mejor
+Intermedio         10,86 ± 0,22      4,46 ± 0,20     -6,40     0,59  mejor
+Avanzado           12,57 ± 0,21     10,87 ± 0,25     -1,70     0,65  mejor
+------------------------------------------------------------------------
+MEDIA (3)           9,18 ± 0,11      5,73 ± 0,11     -3,45     0,32  mejor
+v0 es mejor contra 3 rivales, peor contra 0 y no se distingue contra 0.
+```
