@@ -1,4 +1,4 @@
-package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v1Ghosts;
+package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v0Ghosts;
 
 import java.util.EnumMap;
 import es.ucm.fdi.ici.Action;
@@ -11,12 +11,12 @@ import pacman.game.Game;
 
 public class Ghosts extends GhostController {
 
-	static final String FCL_PATH = "bin/es/ucm/fdi/ici/c2627/practica4/GIRM_OGA_LIN_LING/v1Ghosts/";
+	static final String FCL_PATH = "bin/es/ucm/fdi/ici/c2627/practica4/GIRM_OGA_LIN_LING/v0Ghosts/";
 	
     private final EnumMap<GHOST, FuzzyEngine> motores = new EnumMap<>(GHOST.class);
 
     public Ghosts() {
-        this("ghosts-v1.fcl"); // nombre del fichero que contiene las reglas traducidas
+        this("ghosts-v0.fcl"); // nombre del fichero que contiene las reglas traducidas
     }
 
     public Ghosts(String ficheroFcl) {

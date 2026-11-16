@@ -1,4 +1,4 @@
-package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v1Ghosts;
+package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v0Ghosts;
 
 import java.util.HashMap;
 import es.ucm.fdi.ici.fuzzy.FuzzyInput;
