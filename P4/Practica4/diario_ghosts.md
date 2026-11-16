@@ -78,3 +78,7 @@ Avanzado           12,57 ± 0,21     10,87 ± 0,25     -1,70     0,65  mejor
 MEDIA (3)           9,18 ± 0,11      5,73 ± 0,11     -3,45     0,32  mejor
 v0 es mejor contra 3 rivales, peor contra 0 y no se distingue contra 0.
 ```
+
+## Sesión 3 (Lunes 16 de noviembre) · Arreglo de la fcl (ghost-v1.fcl)
+ 
+En la fcl anterior, que se tomo de base las reglas de la practic anterior nos dimos cuenta que era necesario realisar unos cambios ya que en las reglas de control de comina (desde R7 hasta R21) no se comprobaban a qué fantasma pertenecía y al no tener `soy IS ...`, todos los fantasmas activaban las reglas de control de píldoras y por eso PINKY, BLINKY y el resto ganaban con controlarpills aunque no fuera su rol.
