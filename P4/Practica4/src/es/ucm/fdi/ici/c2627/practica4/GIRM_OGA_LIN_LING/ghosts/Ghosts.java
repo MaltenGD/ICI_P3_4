@@ -19,7 +19,7 @@ public class Ghosts extends GhostController {
     private final EnumMap<GHOST, FuzzyEngine> motores = new EnumMap<>(GHOST.class);
 
     public Ghosts() {
-        this("ghosts-v0.fcl");                    // la versiÃ³n que va al concurso
+        this("ghosts-v0.fcl");                    // la versiÃƒÂ³n que va al concurso
     }
 
     /** Un motor por fantasma, todos con el mismo .fcl: cada uno con sus acciones y sus valores. */
@@ -28,7 +28,7 @@ public class Ghosts extends GhostController {
         setTeam("GIRM_OGA_LIN_LING");
         for (GHOST g : GHOST.values()) {
             Action[] acciones = { new PerseguirAction(g), new HuirAction(g) };
-            motores.put(g, new FuzzyEngine(g.name(), MsPacMan.FCL_PATH + ficheroFcl, "Ghost",
+            motores.put(g, new FuzzyEngine(g.name(), "bin/es/ucm/fdi/ici/c2627/practica4/GIRM_OGA_LIN_LING/" + ficheroFcl, "Ghost",
                     new MaxActionSelector(acciones)));
         }
     }

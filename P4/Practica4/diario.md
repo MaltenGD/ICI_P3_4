@@ -2,60 +2,27 @@
 
 **Integrantes:** Guillermo Isaac Ramos Medina, Óliver García Aguado, Lin Ling, Liling Chen  
 **Grupo:** GIRM_OGA_LIN_LING  
-**Controlador:** Ms. Pac-Man (Lógica Borrosa)  
-**Rivales de referencia:** 5 fantasmas (Random, Aggressive, Basico, Intermedio, Avanzado)  
-**Partidas por rival:** 300  
-**Métricas fijadas:** Puntos, turnos por vida, fantasmas comidos  
+
+
+## DIARIO DE PACMAN
+
+## Sesión 1 (Jueves 12 de noviembre) · Porteo de Pac-Man de la P3 a reglas borrosas (v0)
+
+Empezamos la práctica mirando la wiki y lo que venía en el proyecto de partida. El archivo `mspacman-v0.fcl` de la plantilla era demasiado básico (solo 6 reglas simples de comer o huir sin píldoras de poder ni matices), así que para que la v0 tuviera sentido decidimos hacer un port directo del Pac-Man que teníamos en la Práctica 3 a lógica borrosa, igual que hicimos en su momento con los fantasmas.
+
+Para trasladarlo a Java adaptamos las acciones para que implementen `Action` directa (`ComerAction`, `HuirAction`, `PerseguirAction`, `IrAPPillAction`) y en `MsPacManInput.java` calculamos las distancias en pasos acotadas a 150 (`peligro`, `comestible`, `ppill` y `ventajaPPill = peligro - ppill`) para que no metan valores raros al motor borroso. Al escribir el FCL nos encontramos con que `jFuzzyLogic` da error de parseo si metes más de dos consecuentes en un `THEN`, así que tuvimos que separar esas acciones en reglas independientes.
+
+### Uso de IA y Prompts (Sesión 1)
+- **Prompt:** *"Traduce la lógica de reglas de Jess de este proyecto (practica 3) a un bloque FCL de jFuzzyLogic para MsPacMan, con 4 entradas (peligro, comestible, ppill, ventajaPPill) y 4 salidas (comer, huir, perseguir, irAPPill) usando COG."*
+- **Qué cambiamos nosotros:** La IA intentó meter tres consecuentes en un solo `THEN` (`THEN huir IS mucho, comer IS poco, irAPPill IS poco;`), lo que hacía fallar el parser de FCL. Tuvimos que separar esas acciones a mano en reglas de dos salidas como máximo y retocar los trapecios de `encima` y `cerca` para que la transición al huir fuera progresiva y no pegase saltos bruscos.
 
 ---
 
-## Sesión 1 (Jueves 12 de noviembre) porteo del pacman de la P3
+## Sesión 2 (Viernes 13 de noviembre) · Ajuste de reglas de la v0, pruebas y resultados
 
+Terminamos de ajustar las 9 reglas de la v0 en `mspacman-v0.fcl`. La idea era mantener la lógica que ya nos funcionaba bien en la P3: huida a tope si el peligro está encima ($d \le 10$), ir a por la Power Pill solo si llegamos antes que el fantasma (`ventajaPPill IS ventaja`), perseguir comestibles si da tiempo a cazarlos y comer por defecto cuando no hay peligro cerca.
 
-Al revisar el proyecto de partida vimos que el `mspacman-v0.fcl` es una plantilla muy simplona (solo 6 reglas de huir o comer sin píldoras de poder ni matices).
-Decidimos que nuestra `v0`  iba a ser un porteo fiel de uno de los primeros pacman de la Práctica 3 y no una copia directa de la plantilla, este controlador agrega a la plantilla lo siguiente:
-1. **Peligro escalonado:** En la P3 el pacman diferencia entre peligro cercano general ($d < 25$) y peligro crítico o desesperado ($d \le 6$) donde huir era la mayor prioridad.
-2. **Píldoras de poder con ventaja:** Comprobábamos si Pac-Man llegaba a la píldora antes que el fantasma. Si el fantasma estaba demasiado encima, no se arriesgaba y huía.
-3. **Criterio de caza estricto:** Solo perseguir a un fantasma comestible si daba tiempo a alcanzarlo antes de que volviese a ser peligroso ($tiempo > 2 \cdot dist + 2$).
-4. **Rematar:** Si un comestible estaba muy cerca, valía la pena rematarlo aunque hubiese peligro a distancia media.
-
-Para trasladar esto a la arquitectura de `jFuzzyLogic`:
-- En `MsPacManInput.java` calculamos en Java las distancias en pasos de camino acotadas a `LEJOS = 150` (evitando devolver `-1` para no tener problemas con los conjuntos borrosos): `peligro`, `comestible` (solo si da tiempo a cazarlo; si no, vale `LEJOS`), `ppill` y una nueva variable `ventajaPPill = peligro - ppill`.
-- Las acciones (`ComerAction`, `HuirAction`, `PerseguirAction`, `IrAPPillAction`) ahora implementan `Action` directa, eliminando `RulesAction` y `parseFact` de Jess.
-- En `mspacman-v0.fcl` definimos las 4 entradas, las 4 salidas (`comer`, `huir`, `perseguir`, `irAPPill`) con defuzzificación por Centro de Gravedad (`COG`) y particiones borrosas con términos trapezoidales y triangulares (`encima`, `cerca`, `media`, `lejos`).
-
-Tuvimos que lidiar con un par de detalles de sintaxis de FCL con jFuzzyLogic: en una regla (`THEN`), jFuzzyLogic solo admite asignar a lo sumo dos salidas separadas por coma en una misma línea; si se ponen tres da error de parseo (`mismatched input ',' expecting SEMICOLON`). Lo solucionamos separandolo en una regla aparte.
-
----
-
-## Sesión 2 (Viernes 13 de noviembre) · Caza, verificación de casos y resultados de la v0
-
-Terminamos de ajustar las 9 reglas borrosas de la `v0` que completan el porteo de la P3:
-- **R1 y R2 (Huida desesperada):** Si `peligro IS encima`, `huir IS mucho`, `comer IS poco` e `irAPPill IS poco`.
-- **R3 (Huida estándar):** Si `peligro IS cerca`, `huir IS mucho`, `comer IS poco`.
-- **R4 y R5 (Comida y retirada de huida):** Con peligro a distancia `media`, `comer IS algo`; con peligro `lejos`, `comer IS mucho` y `huir IS poco`.
-- **R6 (Poder con ventaja):** Si `peligro IS cerca AND ppill IS cerca AND ventajaPPill IS ventaja`, `irAPPill IS mucho, huir IS poco`.
-- **R7 (Caza estándar):** Si `comestible IS cerca AND peligro IS NOT cerca AND peligro IS NOT encima`, `perseguir IS mucho, comer IS poco`. La supresión de `comer` es obligatoria para romper el empate contra la regla de comer en ausencia de peligro.
-- **R8 (Rematar antes de huir):** Si `comestible IS cerca AND peligro IS media`, `perseguir IS mucho, comer IS poco`.
-- **R9 (Comer por defecto):** Si no hay peligro encima ni cerca y no hay comestibles que cazar, `comer IS mucho`.
-
-### Verificación unitaria con `ProbarBorroso`
-
-Comprobamos el comportamiento del motor borroso en frío con `ProbarBorroso`, diseñando 7 situaciones que replican las condiciones de la P3:
-1. **Nada cerca:** entradas (150, 150, 150, -150) -> gana `comer` (8.7 vs 1.3). [BIEN]
-2. **Peligro encima a 5 pasos (desesperado):** entradas (5, 150, 150, -150) -> gana `huir` (8.7 vs 1.3). [BIEN]
-3. **Peligroso a 20 pasos sin píldora:** entradas (20, 150, 150, -150) -> gana `huir` (8.7 vs 1.3). [BIEN]
-4. **Peligroso a 45 pasos (media):** entradas (45, 150, 150, -150) -> gana `comer` (6.5 vs 0.0). [BIEN]
-5. **Comestible alcanzable a 10 pasos con peligro lejos:** entradas (150, 10, 150, -150) -> gana `perseguir` (8.7 vs 5.0). [BIEN]
-6. **Peligro a 25 pasos y PPill a 8 pasos (ventaja +17):** entradas (25, 150, 8, +17) -> gana `irAPPill` (8.6 vs 5.0). [BIEN]
-7. **Peligro encima a 5 pasos y PPill a 8 pasos (desesperado sin ventaja):** entradas (5, 150, 8, -3) -> gana `huir` (8.7 vs 1.3). [BIEN]
-
-La curva de control de peligro muestra transiciones suaves:
-- De 0 a 30 pasos gana `huir` con holgura.
-- A partir de 35 pasos `comer` toma la delantera suavemente (6.9 a 35 pasos, subiendo hasta 8.7 a los 75 pasos).
-- No hay escalones muertos ni empates no deseados.
-
-Probamos también `VerPartida` con `TrazaBorrosa` conectada frente a los fantasmas agresivos para comprobar que las reglas se activan y que las 4 acciones se ejecutan cuando toca.
+Para comprobar que todo funcionaba antes de ponernos a jugar partidas, probamos el FCL con `ProbarBorroso` sobre 7 situaciones típicas (peligro encima, peligro a distancia media, píldora con ventaja y sin ventaja, caza de comestibles). En todos los casos ganó la acción que esperábamos y la curva mostró una transición limpia hacia huir por debajo de 35 pasos. También miramos un par de partidas en `VerPartida` con la traza conectada para comprobar que se movía con sentido antes de lanzar las 300 partidas oficiales de `Comparar.java`.
 
 ### Resultados de la línea base (MsPacMan v0 - Porteo P3)
 
@@ -175,3 +142,63 @@ Los turnos por vida aumentan de 470 a 551 (+81).
 Los fantasmas comidos aumentan de 2,78 a 3,35 (+0,57).
 Las pruebas unitarias terminan con los cinco escenarios correctos.
 La mejora que más se nota es que el controlador consigue combinar mejor la supervivencia con la caza de fantasmas comestibles, sin limitarse a huir constantemente ante cualquier situación de peligro. Decidiremos conservar esta versión como nuestra entrega y nuevo modelo para futuras versiones.
+
+---
+
+## Sesión 3 (Lunes 16 de noviembre) · Versión v2: Corrección táctica de Power Pills y barrido final de laberinto
+
+Mirando las partidas y el FCL de la v1 vimos que aunque los números subían, Pac-Man hacía una cosa muy rara: se iba directo a comerse las Power Pills aunque los fantasmas estuvieran en la otra punta del mapa. Al mirar el código vimos el fallo: en `MsPacManInputV1` se metió `ppillsRestantes` contando las 4 Power Pills en vez de las bolitas normales. Las reglas R22 y R35 se activaban y Pac-Man quemaba su mejor salvavidas aunque no hubiera peligro cerca. Además, el FCL se había ido a 35 micro-reglas bastante difíciles de seguir.
+
+Para la **v2** cambiamos `ppillsRestantes` por `comidaRestante` con las píldoras normales ($0 \dots 220$) y dejamos el FCL en solo 22 reglas. La idea era no tocar las Power Pills si no hay moros en la costa, usarlas para emboscar cuando se acercan a media distancia, acelerar a por la píldora si tenemos un fantasma cerca al que le pudieramos ganar en carrera, y usarlas para limpiar el laberinto cuando quedan pocas pills normales. En Java ajustamos `IrAPPillAction` con la heurística de píldoras aisladas y el movimiento aproximado para que no baile en los cruces.
+### Resultados comparativos (300 partidas por rival, semillas 1 a 300)
+
+Ejecutamos `Comparar.java` con las 300 partidas oficiales frente a los 5 rivales de referencia (1500 partidas por versión):
+
+#### Puntos obtenidos (v2 frente a v1)
+```
+rival                        v1               v2         D   2·ET_D
+Random               4408 ± 126       4686 ± 137      +279      372  ruido
+Aggressive           3438 ± 106       3570 ± 119      +132      319  ruido
+Basico                2577 ± 71        2674 ± 76       +98      208  ruido
+Intermedio            2454 ± 75        2206 ± 70      -249      206  peor
+Avanzado              1953 ± 53        2027 ± 56       +74      155  ruido
+------------------------------------------------------------------------
+MEDIA (5)             2966 ± 40        3033 ± 43       +67      118  ruido
+v2 es mejor contra 0 rivales, peor contra 1 y no se distingue contra 4.
+```
+
+#### Turnos por vida (v2 frente a v1)
+```
+rival                        v1               v2         D   2·ET_D
+Random                 761 ± 31         727 ± 31       -34       89  ruido
+Aggressive            1004 ± 77         948 ± 76       -56      217  ruido
+Basico                 371 ± 10         366 ± 16        -5       37  ruido
+Intermedio             321 ± 22         275 ± 10       -45       49  ruido
+Avanzado               412 ± 37         320 ± 20       -92       84  peor
+------------------------------------------------------------------------
+MEDIA (5)              573 ± 19         527 ± 17       -46       51  ruido
+v2 es mejor contra 0 rivales, peor contra 1 y no se distingue contra 4.
+```
+
+#### Fantasmas comidos (v2 frente a v1)
+```
+rival                        v1               v2         D   2·ET_D
+Random              4.90 ± 0.17      5.99 ± 0.20     +1.09     0.52  mejor
+Aggressive          4.19 ± 0.15      4.22 ± 0.16     +0.03     0.44  ruido
+Basico              2.82 ± 0.12      3.17 ± 0.13     +0.35     0.35  mejor
+Intermedio          2.59 ± 0.11      2.52 ± 0.12     -0.07     0.34  ruido
+Avanzado            1.96 ± 0.10      2.25 ± 0.11     +0.29     0.29  ruido
+------------------------------------------------------------------------
+MEDIA (5)           3.29 ± 0.06      3.63 ± 0.07     +0.34     0.18  mejor
+v2 es mejor contra 2 rivales, peor contra 0 y no se distingue contra 3.
+```
+
+### Uso de IA y Prompts (Sesión 3)
+- **Prompt:** *"Tengo un controlador borroso en FCL con 35 reglas donde el agente come Power Pills innecesariamente cuando los fantasmas están lejos. Refactorizalo a un conjunto modular de mas o menos 20 reglas en jFuzzyLogic que sustituya ppillsRestantes por comidaRestante (0 a 220), preserve las Power Pills para emboscadas a media distancia o escape ante acoso, y dé prioridad a limpiar las últimas pills del mapa."*
+- **Qué cambiamos nosotros:** La IA propuso una regla de escape que exigms pacman uidoresCerca IS ninguno`, lo que era contradictorio porque si un fantasma está cerca ya cuenta como 1 perseguidor (`pocos`), provocando que la regla nunca se disparase en partidas reales. La modificamos manualmente para evaluar `perseguidoresCerca IS pocos` y añadimos la modulación `huir IS poco` en las carreras ganables para evitar empates por centro de gravedad en intersecciones estrechas.
+
+### Conclusión de la sesión
+El cambio ha merecido la pena: al no malgastar las píldoras a lo tonto, Pac-Man sobrevive mejor y caza mucho más. Los fantasmas comidos suben a 3.63 de media (+0.34 sobre v1 y casi un fantasma más que en v0), comiéndose casi 6 fantasmas por partida contra Random y más de 3.1 contra Básico. En puntos sube a 3033 de media y el código queda mucho más limpio con 22 reglas en vez de las 35 anteriores.
+mereci'pó, as csecome mucho mas
+
+

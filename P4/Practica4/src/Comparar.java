@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts.Ghosts;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.MsPacMan;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v1MsPacMan.MsPacManv1;
+import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v2MsPacMan.MsPacManv2;
 import pacman.controllers.GhostController;
 import pacman.controllers.PacmanController;
 import pacman.game.Game;
@@ -42,6 +43,7 @@ public class Comparar {
     static {
         MIS_PACMANS.put("v0", () -> new MsPacMan("mspacman-v0.fcl"));     // huir, comer y perseguir
         MIS_PACMANS.put("v1", () -> new MsPacManv1("mspacman-v1.fcl"));     // con la píldora de poder
+        MIS_PACMANS.put("v2", () -> new MsPacManv2("mspacman-v2.fcl"));     // táctica de PPill y limpieza de laberinto
 
         MIS_FANTASMAS.put("v0", () -> new Ghosts("ghosts-v0.fcl"));       // perseguir o huir
         MIS_FANTASMAS.put("v1", () -> new Ghosts("ghosts-v1.fcl"));       // con la píldora de poder
