@@ -1,0 +1,181 @@
+FUNCTION_BLOCK Ghost
+
+VAR_INPUT
+   comestible   : REAL;
+   enCarcel     : REAL;
+   distPacman   : REAL;
+   distOtro     : REAL;
+   restantes    : REAL;
+   ventajaPPill : REAL;
+   soy          : REAL;
+END_VAR
+
+VAR_OUTPUT
+   huir          : REAL;
+   controlarpills: REAL;
+   emboscar      : REAL;
+   dispersar     : REAL;
+   guardarppill  : REAL;
+   perseguir     : REAL;
+END_VAR
+
+FUZZIFY comestible
+   TERM no := (0, 1) (1, 0);
+   TERM si := (0, 0) (1, 1) (1, 1);
+END_FUZZIFY
+
+FUZZIFY enCarcel
+   TERM no := (0, 1) (1, 0);
+   TERM si := (0, 0) (1, 1) (1, 1);
+END_FUZZIFY
+
+FUZZIFY distPacman
+   TERM cerca := (0, 1) (10, 1) (20, 0);
+   TERM media := trian 15 35 55;
+   TERM lejos := (45, 0) (75, 1) (150, 1);
+END_FUZZIFY
+
+FUZZIFY distOtro
+   TERM apretado := (0, 1) (15, 1) (30, 0);
+   TERM separado := (25, 0) (50, 1) (150, 1);
+END_FUZZIFY
+
+FUZZIFY restantes
+   TERM pocas  := (0, 1) (150, 1) (200, 0);
+   TERM muchas := (180, 0) (220, 1) (240, 1);
+END_FUZZIFY
+
+FUZZIFY ventajaPPill
+   TERM negativa := (-150, 1) (-10, 1) (0, 0);
+   TERM positiva := (0, 0) (10, 1) (150, 1);
+END_FUZZIFY
+
+FUZZIFY soy
+   TERM blinky := (2, 1) (2.5, 0);
+   TERM pinky  := (0, 1) (0.5, 0);
+   TERM inky   := (1, 1) (1.5, 0);
+   TERM sue    := (3, 1) (3.5, 0);
+END_FUZZIFY
+
+DEFUZZIFY huir
+   TERM poco  := (0, 1) (4, 0);
+   TERM algo  := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY controlarpills
+   TERM poco  := (0, 1) (4, 0);
+   TERM algo  := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY emboscar
+   TERM poco  := (0, 1) (4, 0);
+   TERM algo  := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY dispersar
+   TERM poco  := (0, 1) (4, 0);
+   TERM algo  := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY guardarppill
+   TERM poco  := (0, 1) (4, 0);
+   TERM algo  := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY perseguir
+   TERM poco  := (0, 1) (4, 0);
+   TERM algo  := trian 2 5 8;
+   TERM mucho := (6, 0) (10, 1);
+   METHOD : COG;
+   DEFAULT := 0;
+END_DEFUZZIFY
+
+RULEBLOCK reglas
+   AND : MIN;
+   ACT : MIN;
+   ACCU : MAX;
+
+   // HUIDA — Para TODOS si están comestibles
+  
+   RULE 1 : IF comestible IS si THEN huir IS mucho;
+   RULE 2 : IF comestible IS si THEN controlarpills IS poco;
+   RULE 3 : IF comestible IS si THEN emboscar IS poco;
+   RULE 4 : IF comestible IS si THEN dispersar IS poco;
+   RULE 5 : IF comestible IS si THEN guardarppill IS poco;
+   RULE 6 : IF comestible IS si THEN perseguir IS poco;
+
+   // CONTROL DE COMIDA (prioridad 70) — SUE, BLINKY e INKY
+
+   // SUE controla siempre que queden pocas
+   RULE 7 : IF soy IS sue AND comestible IS no AND enCarcel IS no AND restantes IS pocas THEN controlarpills IS mucho;
+   RULE 8 : IF soy IS sue AND comestible IS no AND enCarcel IS no AND restantes IS pocas THEN emboscar IS poco;
+   RULE 9 : IF soy IS sue AND comestible IS no AND enCarcel IS no AND restantes IS pocas THEN perseguir IS poco;
+
+   // BLINKY ayuda si quedan muy pocas
+   RULE 10 : IF soy IS blinky AND comestible IS no AND enCarcel IS no AND restantes IS pocas THEN controlarpills IS mucho;
+   RULE 11 : IF soy IS blinky AND comestible IS no AND enCarcel IS no AND restantes IS pocas THEN emboscar IS poco;
+   RULE 12 : IF soy IS blinky AND comestible IS no AND enCarcel IS no AND restantes IS pocas THEN perseguir IS poco;
+
+   // INKY sustituye a SUE (se asume que si INKY va a controlar, SUE no está)
+   RULE 13 : IF soy IS inky AND comestible IS no AND enCarcel IS no AND restantes IS pocas THEN controlarpills IS algo;
+   RULE 14 : IF soy IS inky AND comestible IS no AND enCarcel IS no AND restantes IS pocas THEN emboscar IS poco;
+   RULE 15 : IF soy IS inky AND comestible IS no AND enCarcel IS no AND restantes IS pocas THEN perseguir IS poco;
+
+   // INTERCEPTACIÓN
+
+   // PINKY tiene prioridad estratégica para interceptar
+   RULE 16 : IF soy IS pinky AND comestible IS no AND enCarcel IS no THEN emboscar IS mucho;
+   RULE 17 : IF soy IS pinky AND comestible IS no AND enCarcel IS no THEN perseguir IS poco;
+
+   // SUE intercepta si Pac-Man está lejos
+   RULE 18 : IF soy IS sue AND comestible IS no AND enCarcel IS no AND distPacman IS lejos THEN emboscar IS algo;
+   RULE 19 : IF soy IS sue AND comestible IS no AND enCarcel IS no AND distPacman IS lejos THEN perseguir IS poco;
+
+   // Regla general de emboscar para todos (pero solo si están lejos, para no quitarle el sitio a perseguir)
+   RULE 20 : IF comestible IS no AND enCarcel IS no AND distPacman IS lejos THEN emboscar IS algo;
+   RULE 21 : IF comestible IS no AND enCarcel IS no AND distPacman IS lejos THEN perseguir IS poco;
+
+   // ROLES ESPECÍFICOS
+
+   // BLINKY persigue cuando Pac-Man está cerca (prioridad 25)
+   RULE 22 : IF soy IS blinky AND comestible IS no AND enCarcel IS no AND distPacman IS cerca THEN perseguir IS mucho;
+   RULE 23 : IF soy IS blinky AND comestible IS no AND enCarcel IS no AND distPacman IS cerca THEN emboscar IS poco;
+
+   // INKY guarda la PPill ventajosa
+   RULE 24 : IF soy IS inky AND comestible IS no AND enCarcel IS no AND ventajaPPill IS positiva THEN guardarppill IS mucho;
+   RULE 25 : IF soy IS inky AND comestible IS no AND enCarcel IS no AND ventajaPPill IS positiva THEN perseguir IS poco;
+
+   // DISPERSIÓN— Para los que no están cerca
+   RULE 26 : IF soy IS blinky AND comestible IS no AND enCarcel IS no AND distOtro IS apretado AND distPacman IS lejos THEN dispersar IS algo;
+   RULE 27 : IF soy IS blinky AND comestible IS no AND enCarcel IS no AND distOtro IS apretado AND distPacman IS lejos THEN perseguir IS poco;
+
+   RULE 28 : IF soy IS pinky AND comestible IS no AND enCarcel IS no AND distOtro IS apretado AND distPacman IS lejos THEN dispersar IS algo;
+   RULE 29 : IF soy IS pinky AND comestible IS no AND enCarcel IS no AND distOtro IS apretado AND distPacman IS lejos THEN perseguir IS poco;
+
+   RULE 30 : IF soy IS inky AND comestible IS no AND enCarcel IS no AND distOtro IS apretado AND distPacman IS lejos THEN dispersar IS algo;
+   RULE 31 : IF soy IS inky AND comestible IS no AND enCarcel IS no AND distOtro IS apretado AND distPacman IS lejos THEN perseguir IS poco;
+
+   RULE 32 : IF soy IS sue AND comestible IS no AND enCarcel IS no AND distOtro IS apretado AND distPacman IS lejos THEN dispersar IS algo;
+   RULE 33 : IF soy IS sue AND comestible IS no AND enCarcel IS no AND distOtro IS apretado AND distPacman IS lejos THEN perseguir IS poco;
+
+   // RESERVA — Perseguir por defecto
+
+   RULE 34 : IF comestible IS no AND enCarcel IS no THEN perseguir IS algo;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
