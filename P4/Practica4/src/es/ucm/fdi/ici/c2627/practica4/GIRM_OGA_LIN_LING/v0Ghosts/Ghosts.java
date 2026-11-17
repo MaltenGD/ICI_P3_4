@@ -1,6 +1,8 @@
 package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v0Ghosts;
 
 import java.util.EnumMap;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import es.ucm.fdi.ici.Action;
 import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.MaxActionSelector;
 import es.ucm.fdi.ici.fuzzy.FuzzyEngine;
@@ -22,6 +24,9 @@ public class Ghosts extends GhostController {
     public Ghosts(String ficheroFcl) {
         setName("Ghosts GIRM_OGA_LIN_LING");
         setTeam("GIRM_OGA_LIN_LING");
+        Path ruta = Path.of(FCL_PATH, ficheroFcl);
+        if (!Files.isRegularFile(ruta)) ruta = Path.of("Practica4").resolve(ruta);
+        if (!Files.isRegularFile(ruta)) throw new IllegalArgumentException("no se encuentra " + ruta);
         for (GHOST g : GHOST.values()) {
             Action[] acciones = {
                 new PerseguirAction(g),
@@ -30,7 +35,7 @@ public class Ghosts extends GhostController {
                 new DispersarAction(g),
                 new GuardarPPillAction(g)
             };
-            motores.put(g, new FuzzyEngine(g.name(), FCL_PATH + ficheroFcl, "Ghost",
+            motores.put(g, new FuzzyEngine(g.name(), ruta.toString(), "Ghost",
                     new MaxActionSelector(acciones)));
         }
     }

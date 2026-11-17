@@ -3,6 +3,10 @@
 **Integrantes:** Guillermo Isaac Ramos Medina, Óliver García Aguado, Lin Ling, Liling Chen  
 **Grupo:** GIRM_OGA_LIN_LING  
 
+**Concurso de fantasmas:** v4, con `ghosts-v4.fcl`.  
+**Rivales:** Ms. Pac-Man Básico, Intermedio y Avanzado, los tres de referencia.  
+**Medición:** 300 partidas por versión y rival en cada tanda. Cada comparación indica debajo las semillas usadas. Se mantiene el límite de 4000 turnos del banco, la visión completa y los 40 ms por turno. El motor no repite todos los detalles de una partida solo con la semilla, así que los valores pueden variar al volver a ejecutar el banco.  
+**Métricas:** puntos de Pac-Man, turnos por vida y fantasmas comidos. Para los fantasmas interesa que las tres bajen.
 
 # DIARIO DE GHOSTS
 
@@ -79,6 +83,334 @@ MEDIA (3)           9,18 ± 0,11      5,73 ± 0,11     -3,45     0,32  mejor
 v0 es mejor contra 3 rivales, peor contra 0 y no se distingue contra 0.
 ```
 
-## Sesión 3 (Lunes 16 de noviembre) · Arreglo de la fcl (ghost-v1.fcl)
+## Sesión 3 (Lunes 16 de noviembre) · v1: Arreglo de la fcl (38 reglas)
  
 En la fcl anterior, que se tomo de base las reglas de la practic anterior nos dimos cuenta que era necesario realisar unos cambios ya que en las reglas de control de comina (desde R7 hasta R21) no se comprobaban a qué fantasma pertenecía y al no tener `soy IS ...`, todos los fantasmas activaban las reglas de control de píldoras y por eso PINKY, BLINKY y el resto ganaban con controlarpills aunque no fuera su rol.
+
+El FCL de 38 reglas se conserva tal como venía en el proyecto. Al probarlo, se vio que el problema no era solo escribir `soy IS`: algunos términos de la identidad se solapaban. Con identidad 0, Pinky también activaba el término de Inky. Además, en el controlador original la salida `controlarpills` no tenía una acción registrada en el selector. Dejamos v1 así para comparar con lo que había y corregimos las dos cosas en la siguiente versión.
+
+
+---
+
+## Sesión 4 (Lunes 16 de noviembre) · v2: ordenar los papeles (38 reglas)
+
+Partimos del v1 de 38 reglas y rehacemos el bloque de prioridades. Separamos las reglas de huir, perseguir, emboscar, dispersarse y guardar poder. Los términos de identidad son triángulos centrados en el número de cada fantasma, así Pinky ya no activa los papeles de los demás. Se quita la salida de controlar comida, que nunca podía ganar en el selector.
+
+Blinky aumenta la presión cuando tiene a Pac-Man cerca. Pinky intenta cortar el paso si puede llegar al cruce previsto; si no puede, persigue. Inky guarda poder según su ventaja de llegada. Sue se separa si el grupo está junto y Pac-Man está lejos. Para huir, las reglas distinguen si Pac-Man está cerca y cuánto tiempo queda comestible. Las salidas usan varios grados: por ejemplo, una ventaja ajustada no pesa igual que una ventaja amplia.
+
+Se probó que Pinky persigue si no llega al cruce, que Inky persigue si no hay poder que pueda defender y que Sue se dispersa cuando corresponde. La curva pasó por 46508 puntos sin huecos ni empates ganadores. Las 38 reglas se activaron en la traza.
+
+### Resultados de v2 frente a v1
+
+**Semillas 1 a 300**
+
+```text
+300 partidas por versión y rival, semillas 1 a 300, comparando fantasmas.
+
+== puntos: v2 frente a v1 (menos es mejor) ==
+rival                        v1               v2         D   2·ET_D
+Basico                2094 ± 53        2095 ± 56        +1      154  ruido
+Intermedio           5009 ± 169       2827 ± 127     -2182      423  mejor
+Avanzado             8514 ± 196      10473 ± 202     +1959      562  peor
+------------------------------------------------------------------------
+MEDIA (3)             5206 ± 88        5132 ± 82       -74      240  ruido
+v2 es mejor contra 1 rivales, peor contra 1 y no se distingue contra 1.
+
+== turnos por vida: v2 frente a v1 (menos es mejor) ==
+rival                        v1               v2         D   2·ET_D
+Basico                1652 ± 94         758 ± 68      -894      232  mejor
+Intermedio            2909 ± 79        3598 ± 55      +689      194  peor
+Avanzado              3042 ± 72        2530 ± 78      -512      212  mejor
+------------------------------------------------------------------------
+MEDIA (3)             2534 ± 47        2295 ± 39      -239      123  mejor
+v2 es mejor contra 2 rivales, peor contra 1 y no se distingue contra 0.
+
+== fantasmas comidos: v2 frente a v1 (menos es mejor) ==
+rival                        v1               v2         D   2·ET_D
+Basico              1.66 ± 0.09      2.12 ± 0.10     +0.46     0.27  peor
+Intermedio          5.40 ± 0.22      2.42 ± 0.18     -2.97     0.57  mejor
+Avanzado           11.17 ± 0.26     13.96 ± 0.26     +2.79     0.74  peor
+------------------------------------------------------------------------
+MEDIA (3)           6.08 ± 0.12      6.17 ± 0.11     +0.09     0.32  ruido
+v2 es mejor contra 1 rivales, peor contra 2 y no se distingue contra 0.
+```
+
+**Semillas 1001 a 1300**
+
+```text
+300 partidas por versión y rival, semillas 1001 a 1300, comparando fantasmas.
+
+== puntos: v2 frente a v1 (menos es mejor) ==
+rival                        v1               v2         D   2·ET_D
+Basico                2236 ± 62        2171 ± 60       -65      172  ruido
+Intermedio           4375 ± 155       2624 ± 112     -1751      382  mejor
+Avanzado             8290 ± 199       9881 ± 199     +1590      563  peor
+------------------------------------------------------------------------
+MEDIA (3)             4967 ± 87        4892 ± 79       -75      234  ruido
+v2 es mejor contra 1 rivales, peor contra 1 y no se distingue contra 1.
+
+== turnos por vida: v2 frente a v1 (menos es mejor) ==
+rival                        v1               v2         D   2·ET_D
+Basico                1880 ± 98         808 ± 71     -1073      242  mejor
+Intermedio            2906 ± 79        3634 ± 54      +728      191  peor
+Avanzado              3037 ± 71        2505 ± 82      -532      217  mejor
+------------------------------------------------------------------------
+MEDIA (3)             2608 ± 48        2316 ± 40      -292      126  mejor
+v2 es mejor contra 2 rivales, peor contra 1 y no se distingue contra 0.
+
+== fantasmas comidos: v2 frente a v1 (menos es mejor) ==
+rival                        v1               v2         D   2·ET_D
+Basico              1.98 ± 0.11      2.19 ± 0.10     +0.22     0.30  ruido
+Intermedio          4.52 ± 0.21      2.28 ± 0.16     -2.24     0.53  mejor
+Avanzado           10.88 ± 0.26     13.06 ± 0.25     +2.19     0.72  peor
+------------------------------------------------------------------------
+MEDIA (3)           5.79 ± 0.12      5.85 ± 0.11     +0.05     0.31  ruido
+v2 es mejor contra 1 rivales, peor contra 1 y no se distingue contra 1.
+```
+
+- Semillas 1 a 300: la media de puntos pasa de 5206 a 5132 (-74 puntos, umbral 240). La diferencia queda dentro del ruido.
+- Semillas 1001 a 1300: la media de puntos pasa de 4967 a 4892 (-75 puntos, umbral 234). La diferencia queda dentro del ruido.
+
+### prompts IA
+
+1. crea un fcl v2 aparte. corrige la identidad de los fantasmas con terminos triangulares que no coincidan en los valores 0, 1, 2 y 3. organiza las reglas por huida, persecucion, emboscada, dispersion y defensa de poder. deja varias intensidades por salida para que una ventaja pequeña no tenga el mismo peso que una grande.
+
+## Sesión 5 (Martes 17 de noviembre) · v3: defender dos píldoras (44 reglas)
+
+Inky podía defender una píldora, pero quedaban otras entradas por las que Pac-Man podía conseguir poder. Añadimos una sola táctica: si Inky tiene un objetivo defendible, Sue puede cubrir otra píldora activa. Busca la que le da más ventaja de llegada, excluye la de Inky y pasa esa misma ventaja al FCL.
+
+Las seis reglas nuevas distinguen entre ventaja amplia, margen justo, falta de opción, Pac-Man demasiado cerca y Sue comestible. No se cambia la persecución de Blinky, la emboscada de Pinky ni la búsqueda de poder de Inky. En las 90 partidas de traza de v3, Sue eligió cubrir 2345 veces, y se activaron las 44 reglas. Esta versión ayuda enseguida, aunque Pac-Man aún no haya comido fantasmas.
+
+### Resultados de v3 frente a v2
+
+**Semillas 1 a 300**
+
+```text
+300 partidas por versión y rival, semillas 1 a 300, comparando fantasmas.
+
+== puntos: v3 frente a v2 (menos es mejor) ==
+rival                        v2               v3         D   2·ET_D
+Basico                2095 ± 56        1994 ± 52      -101      152  ruido
+Intermedio           2827 ± 127       3000 ± 129      +173      363  ruido
+Avanzado            10473 ± 202       9534 ± 174      -939      533  mejor
+------------------------------------------------------------------------
+MEDIA (3)             5132 ± 82        4843 ± 74      -289      221  mejor
+v3 es mejor contra 1 rivales, peor contra 0 y no se distingue contra 2.
+
+== turnos por vida: v3 frente a v2 (menos es mejor) ==
+rival                        v2               v3         D   2·ET_D
+Basico                 758 ± 68        1130 ± 86      +372      220  peor
+Intermedio            3598 ± 55        3557 ± 60       -40      163  ruido
+Avanzado              2530 ± 78        2586 ± 80       +56      225  ruido
+------------------------------------------------------------------------
+MEDIA (3)             2295 ± 39        2424 ± 44      +129      118  peor
+v3 es mejor contra 0 rivales, peor contra 1 y no se distingue contra 2.
+
+== fantasmas comidos: v3 frente a v2 (menos es mejor) ==
+rival                        v2               v3         D   2·ET_D
+Basico              2.12 ± 0.10      1.94 ± 0.10     -0.18     0.28  ruido
+Intermedio          2.42 ± 0.18      2.73 ± 0.18     +0.31     0.50  ruido
+Avanzado           13.96 ± 0.26     12.77 ± 0.23     -1.19     0.70  mejor
+------------------------------------------------------------------------
+MEDIA (3)           6.17 ± 0.11      5.82 ± 0.10     -0.35     0.30  mejor
+v3 es mejor contra 1 rivales, peor contra 0 y no se distingue contra 2.
+```
+
+**Semillas 1001 a 1300**
+
+```text
+300 partidas por versión y rival, semillas 1001 a 1300, comparando fantasmas.
+
+== puntos: v3 frente a v2 (menos es mejor) ==
+rival                        v2               v3         D   2·ET_D
+Basico                2171 ± 60        2056 ± 51      -115      157  ruido
+Intermedio           2624 ± 112       3009 ± 142      +385      361  peor
+Avanzado             9881 ± 199       9675 ± 178      -206      534  ruido
+------------------------------------------------------------------------
+MEDIA (3)             4892 ± 79        4913 ± 78       +21      221  ruido
+v3 es mejor contra 0 rivales, peor contra 1 y no se distingue contra 2.
+
+== turnos por vida: v3 frente a v2 (menos es mejor) ==
+rival                        v2               v3         D   2·ET_D
+Basico                 808 ± 71        1183 ± 88      +376      226  peor
+Intermedio            3634 ± 54        3566 ± 58       -68      159  ruido
+Avanzado              2505 ± 82        2697 ± 77      +192      225  ruido
+------------------------------------------------------------------------
+MEDIA (3)             2316 ± 40        2482 ± 44      +167      119  peor
+v3 es mejor contra 0 rivales, peor contra 1 y no se distingue contra 2.
+
+== fantasmas comidos: v3 frente a v2 (menos es mejor) ==
+rival                        v2               v3         D   2·ET_D
+Basico              2.19 ± 0.10      2.01 ± 0.10     -0.18     0.29  ruido
+Intermedio          2.28 ± 0.16      2.82 ± 0.19     +0.54     0.51  peor
+Avanzado           13.06 ± 0.25     12.90 ± 0.23     -0.16     0.68  ruido
+------------------------------------------------------------------------
+MEDIA (3)           5.85 ± 0.11      5.91 ± 0.11     +0.07     0.30  ruido
+v3 es mejor contra 0 rivales, peor contra 1 y no se distingue contra 2.
+```
+
+- Semillas 1 a 300: la media de puntos pasa de 5132 a 4843 (-289 puntos, umbral 221). La diferencia es una mejora según el comparador.
+- Semillas 1001 a 1300: la media de puntos pasa de 4892 a 4913 (+21 puntos, umbral 221). La diferencia queda dentro del ruido.
+
+### prompts IA
+
+1. haz que v3 conserve las reglas de v2 y añade la segunda defensa de poder. busca primero el objetivo que tendria inky. al recorrer las pildoras para sue, descarta esa misma y calcula la diferencia entre la distancia de pacman y la de sue. calcula el camino de sue con su ultima direccion. si no puede defender otra pildora con ventaja, usa las salidas que ya tenia v2.
+
+## Sesión 6 (Martes 17 de noviembre) · v4: reservar la ayuda de Sue (45 reglas)
+
+Con v3, Sue podía dejar la persecución en muchos turnos en los que Pac-Man todavía no estaba aprovechando el poder. En v4 conservamos la segunda defensa, pero pasamos a las reglas los fantasmas que Pac-Man se ha comido durante toda la partida. El motor solo devuelve los que se han comido en el último turno, así que acumulamos el dato una vez por turno y lo reiniciamos al comenzar la siguiente partida.
+
+La defensa gana peso a partir de tres fantasmas comidos y llega al máximo con cinco. Una regla nueva rebaja la cobertura cuando todavía se han comido pocos. En el caso de prueba, con el resto de las entradas fijas, Sue pasó de perseguir a cubrir entre el cuarto y el quinto fantasma comido. La curva de v4 pasó por 116270 puntos sin huecos ni empates ganadores.
+
+En la traza se activaron las 45 reglas. Sue eligió cubrir 476 veces en 90 partidas. Por ejemplo, en el turno 587 ya se habían comido cinco fantasmas y Sue tenía 18 pasos de ventaja: cubrir obtuvo 8,77 y perseguir 7,03. La ayuda se usa menos a menudo que en v3.
+
+### Resultados de v4 frente a v3
+
+**Semillas 1 a 300**
+
+```text
+300 partidas por versión y rival, semillas 1 a 300, comparando fantasmas.
+
+== puntos: v4 frente a v3 (menos es mejor) ==
+rival                        v3               v4         D   2·ET_D
+Basico                1994 ± 52        2072 ± 55       +78      152  ruido
+Intermedio           3000 ± 129       2539 ± 107      -462      336  mejor
+Avanzado             9534 ± 174       9820 ± 179      +286      499  ruido
+------------------------------------------------------------------------
+MEDIA (3)             4843 ± 74        4810 ± 72       -32      207  ruido
+v4 es mejor contra 1 rivales, peor contra 0 y no se distingue contra 2.
+
+== turnos por vida: v4 frente a v3 (menos es mejor) ==
+rival                        v3               v4         D   2·ET_D
+Basico                1130 ± 86         905 ± 78      -225      232  ruido
+Intermedio            3557 ± 60        3728 ± 47      +171      152  peor
+Avanzado              2586 ± 80        2497 ± 78       -89      224  ruido
+------------------------------------------------------------------------
+MEDIA (3)             2424 ± 44        2377 ± 40       -48      119  ruido
+v4 es mejor contra 0 rivales, peor contra 1 y no se distingue contra 2.
+
+== fantasmas comidos: v4 frente a v3 (menos es mejor) ==
+rival                        v3               v4         D   2·ET_D
+Basico              1.94 ± 0.10      2.06 ± 0.10     +0.11     0.27  ruido
+Intermedio          2.73 ± 0.18      2.17 ± 0.16     -0.56     0.48  mejor
+Avanzado           12.77 ± 0.23     12.98 ± 0.23     +0.20     0.65  ruido
+------------------------------------------------------------------------
+MEDIA (3)           5.82 ± 0.10      5.74 ± 0.10     -0.08     0.28  ruido
+v4 es mejor contra 1 rivales, peor contra 0 y no se distingue contra 2.
+```
+
+**Semillas 1001 a 1300**
+
+```text
+300 partidas por versión y rival, semillas 1001 a 1300, comparando fantasmas.
+
+== puntos: v4 frente a v3 (menos es mejor) ==
+rival                        v3               v4         D   2·ET_D
+Basico                2056 ± 51        2131 ± 59       +75      156  ruido
+Intermedio           3009 ± 142       2555 ± 115      -454      365  mejor
+Avanzado             9675 ± 178       9597 ± 185       -78      514  ruido
+------------------------------------------------------------------------
+MEDIA (3)             4913 ± 78        4761 ± 75      -153      217  ruido
+v4 es mejor contra 1 rivales, peor contra 0 y no se distingue contra 2.
+
+== turnos por vida: v4 frente a v3 (menos es mejor) ==
+rival                        v3               v4         D   2·ET_D
+Basico                1183 ± 88         797 ± 72      -387      227  mejor
+Intermedio            3566 ± 58        3685 ± 52      +119      157  ruido
+Avanzado              2697 ± 77        2633 ± 80       -64      222  ruido
+------------------------------------------------------------------------
+MEDIA (3)             2482 ± 44        2372 ± 40      -111      118  ruido
+v4 es mejor contra 1 rivales, peor contra 0 y no se distingue contra 2.
+
+== fantasmas comidos: v4 frente a v3 (menos es mejor) ==
+rival                        v3               v4         D   2·ET_D
+Basico              2.01 ± 0.10      2.19 ± 0.10     +0.18     0.28  ruido
+Intermedio          2.82 ± 0.19      2.17 ± 0.17     -0.65     0.52  mejor
+Avanzado           12.90 ± 0.23     12.69 ± 0.24     -0.21     0.67  ruido
+------------------------------------------------------------------------
+MEDIA (3)           5.91 ± 0.11      5.68 ± 0.10     -0.23     0.30  ruido
+v4 es mejor contra 1 rivales, peor contra 0 y no se distingue contra 2.
+```
+
+- Semillas 1 a 300: la media de puntos pasa de 4843 a 4810 (-32 puntos, umbral 207). La diferencia queda dentro del ruido.
+- Semillas 1001 a 1300: la media de puntos pasa de 4913 a 4761 (-153 puntos, umbral 217). La diferencia queda dentro del ruido.
+
+### Resultados de v4 frente a v2
+
+**Semillas 1 a 300**
+
+```text
+300 partidas por versión y rival, semillas 1 a 300, comparando fantasmas.
+
+== puntos: v4 frente a v2 (menos es mejor) ==
+rival                        v2               v4         D   2·ET_D
+Basico                2095 ± 56        2072 ± 55       -23      157  ruido
+Intermedio           2827 ± 127       2539 ± 107      -288      333  ruido
+Avanzado            10473 ± 202       9820 ± 179      -653      539  mejor
+------------------------------------------------------------------------
+MEDIA (3)             5132 ± 82        4810 ± 72      -321      217  mejor
+v4 es mejor contra 1 rivales, peor contra 0 y no se distingue contra 2.
+
+== turnos por vida: v4 frente a v2 (menos es mejor) ==
+rival                        v2               v4         D   2·ET_D
+Basico                 758 ± 68         905 ± 78      +147      207  ruido
+Intermedio            3598 ± 55        3728 ± 47      +131      145  ruido
+Avanzado              2530 ± 78        2497 ± 78       -33      221  ruido
+------------------------------------------------------------------------
+MEDIA (3)             2295 ± 39        2377 ± 40       +82      112  ruido
+v4 es mejor contra 0 rivales, peor contra 0 y no se distingue contra 3.
+
+== fantasmas comidos: v4 frente a v2 (menos es mejor) ==
+rival                        v2               v4         D   2·ET_D
+Basico              2.12 ± 0.10      2.06 ± 0.10     -0.07     0.28  ruido
+Intermedio          2.42 ± 0.18      2.17 ± 0.16     -0.25     0.49  ruido
+Avanzado           13.96 ± 0.26     12.98 ± 0.23     -0.99     0.70  mejor
+------------------------------------------------------------------------
+MEDIA (3)           6.17 ± 0.11      5.74 ± 0.10     -0.43     0.30  mejor
+v4 es mejor contra 1 rivales, peor contra 0 y no se distingue contra 2.
+```
+
+**Semillas 1001 a 1300**
+
+```text
+300 partidas por versión y rival, semillas 1001 a 1300, comparando fantasmas.
+
+== puntos: v4 frente a v2 (menos es mejor) ==
+rival                        v2               v4         D   2·ET_D
+Basico                2171 ± 60        2131 ± 59       -40      168  ruido
+Intermedio           2624 ± 112       2555 ± 115       -69      320  ruido
+Avanzado             9881 ± 199       9597 ± 185      -284      543  ruido
+------------------------------------------------------------------------
+MEDIA (3)             4892 ± 79        4761 ± 75      -131      218  ruido
+v4 es mejor contra 0 rivales, peor contra 0 y no se distingue contra 3.
+
+== turnos por vida: v4 frente a v2 (menos es mejor) ==
+rival                        v2               v4         D   2·ET_D
+Basico                 808 ± 71         797 ± 72       -11      202  ruido
+Intermedio            3634 ± 54        3685 ± 52       +51      150  ruido
+Avanzado              2505 ± 82        2633 ± 80      +128      229  ruido
+------------------------------------------------------------------------
+MEDIA (3)             2316 ± 40        2372 ± 40       +56      113  ruido
+v4 es mejor contra 0 rivales, peor contra 0 y no se distingue contra 3.
+
+== fantasmas comidos: v4 frente a v2 (menos es mejor) ==
+rival                        v2               v4         D   2·ET_D
+Basico              2.19 ± 0.10      2.19 ± 0.10     -0.00     0.29  ruido
+Intermedio          2.28 ± 0.16      2.17 ± 0.17     -0.11     0.47  ruido
+Avanzado           13.06 ± 0.25     12.69 ± 0.24     -0.37     0.69  ruido
+------------------------------------------------------------------------
+MEDIA (3)           5.85 ± 0.11      5.68 ± 0.10     -0.16     0.29  ruido
+v4 es mejor contra 0 rivales, peor contra 0 y no se distingue contra 3.
+```
+
+- Semillas 1 a 300: la media de puntos pasa de 5132 a 4810 (-321 puntos, umbral 217). La diferencia es una mejora según el comparador.
+- Semillas 1001 a 1300: la media de puntos pasa de 4892 a 4761 (-131 puntos, umbral 218). La diferencia queda dentro del ruido.
+
+
+### prompts IA
+
+1. cambia en v4 solo cuando ayuda sue. en el controlador suma los fantasmas comidos del ultimo turno una vez por tick. reinicia el contador en `preCompute`. añade al fcl un termino que suba desde dos hasta cinco fantasmas comidos. si falta ventaja, pacman esta encima o sue es comestible, deja ganar a las otras acciones.
+
+### Elección para el concurso
+
+Se elige **v4**. 

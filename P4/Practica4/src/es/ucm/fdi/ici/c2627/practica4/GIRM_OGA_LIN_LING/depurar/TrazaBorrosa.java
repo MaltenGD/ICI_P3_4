@@ -80,7 +80,7 @@ public class TrazaBorrosa implements FuzzyEngineObserver {
     }
 
     /** El FuzzyEngine no deja ver su FIS: se lo pedimos por reflexión. Las reglas del primer RULEBLOCK. */
-    private static List<Rule> reglasDe(FuzzyEngine motor) {
+    static List<Rule> reglasDe(FuzzyEngine motor) {
         try {
             Field f = FuzzyEngine.class.getDeclaredField("fis");
             Field b = FuzzyEngine.class.getDeclaredField("fuzzyBlock");

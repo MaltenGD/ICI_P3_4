@@ -1,47 +1,65 @@
 package es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts;
 
 import java.util.EnumMap;
-
-import es.ucm.fdi.ici.Action;
-import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.MaxActionSelector;
-import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts.GhostsInput;
-import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts.actions.HuirAction;
-import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.ghosts.actions.PerseguirAction;
-import es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.mspacman.MsPacMan;
+import java.util.function.Function;
 import es.ucm.fdi.ici.fuzzy.FuzzyEngine;
 import pacman.controllers.GhostController;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
+// elige la version para las pruebas; por defecto usa la v4
 public class Ghosts extends GhostController {
+    private final GhostController controlador;
+    private final Function<GHOST, FuzzyEngine> motor;
 
-    private final EnumMap<GHOST, FuzzyEngine> motores = new EnumMap<>(GHOST.class);
+    public Ghosts() { this("ghosts-v4.fcl"); }
 
-    public Ghosts() {
-        this("ghosts-v0.fcl");                    // la versiÃƒÂ³n que va al concurso
-    }
-
-    /** Un motor por fantasma, todos con el mismo .fcl: cada uno con sus acciones y sus valores. */
-    public Ghosts(String ficheroFcl) {
+    public Ghosts(String fcl) {
+        switch (fcl) {
+            case "ghosts-v0.fcl": {
+                var elegido = new es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v0Ghosts.Ghosts();
+                controlador = elegido;
+                motor = elegido::getMotor;
+                break;
+            }
+            case "ghosts-v1.fcl": {
+                var elegido = new es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v1Ghosts.Ghosts();
+                controlador = elegido;
+                motor = elegido::getMotor;
+                break;
+            }
+            case "ghosts-v2.fcl": {
+                var elegido = new es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v2Ghosts.Ghosts();
+                controlador = elegido;
+                motor = elegido::getMotor;
+                break;
+            }
+            case "ghosts-v3.fcl": {
+                var elegido = new es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v3Ghosts.Ghosts();
+                controlador = elegido;
+                motor = elegido::getMotor;
+                break;
+            }
+            case "ghosts-v4.fcl": {
+                var elegido = new es.ucm.fdi.ici.c2627.practica4.GIRM_OGA_LIN_LING.v4Ghosts.Ghosts();
+                controlador = elegido;
+                motor = elegido::getMotor;
+                break;
+            }
+            default: throw new IllegalArgumentException("version desconocida: " + fcl);
+        }
         setName("Ghosts GIRM_OGA_LIN_LING");
         setTeam("GIRM_OGA_LIN_LING");
-        for (GHOST g : GHOST.values()) {
-            Action[] acciones = { new PerseguirAction(g), new HuirAction(g) };
-            motores.put(g, new FuzzyEngine(g.name(), "bin/es/ucm/fdi/ici/c2627/practica4/GIRM_OGA_LIN_LING/" + ficheroFcl, "Ghost",
-                    new MaxActionSelector(acciones)));
-        }
     }
 
-    public FuzzyEngine getMotor(GHOST g) { return motores.get(g); }
+    @Override
+    public void preCompute(String rival) { controlador.preCompute(rival); }
 
     @Override
     public EnumMap<GHOST, MOVE> getMove(Game game, long timeDue) {
-        EnumMap<GHOST, MOVE> movimientos = new EnumMap<>(GHOST.class);
-        for (GHOST g : GHOST.values()) {
-            if (!game.doesGhostRequireAction(g)) continue;       // fuera de los cruces no hay nada que decidir
-            movimientos.put(g, motores.get(g).run(new GhostsInput(game, g).getFuzzyValues(), game));
-        }
-        return movimientos;
+        return controlador.getMove(game, timeDue);
     }
+
+    public FuzzyEngine getMotor(GHOST g) { return motor.apply(g); }
 }

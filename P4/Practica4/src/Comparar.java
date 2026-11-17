@@ -29,7 +29,7 @@ import pacman.game.util.Stats;
  */
 public class Comparar {
 
-    static final boolean COMPARO_FANTASMAS = false;  // false: vuestras Ms. Pac-Man contra RIVALES_FANTASMAS
+    static final boolean COMPARO_FANTASMAS = true;  // false: vuestras Ms. Pac-Man contra RIVALES_FANTASMAS
                                                      // true:  vuestros fantasmas contra RIVALES_PACMANS
 
     // ---- 1. Vuestras versiones, en orden: cada una contra la anterior -------
@@ -48,6 +48,10 @@ public class Comparar {
         MIS_FANTASMAS.put("v0", () -> new Ghosts("ghosts-v0.fcl"));       // perseguir o huir
         MIS_FANTASMAS.put("v1", () -> new Ghosts("ghosts-v1.fcl"));       // con la píldora de poder
 
+        MIS_FANTASMAS.put("v2", () -> new Ghosts("ghosts-v2.fcl"));
+        MIS_FANTASMAS.put("v3", () -> new Ghosts("ghosts-v3.fcl"));
+        MIS_FANTASMAS.put("v4", () -> new Ghosts("ghosts-v4.fcl"));
+
         // Si queréis más rivales, aquí, y desde el principio: los mismos para todas las versiones.
         // RIVALES_FANTASMAS.put("P3 nuestros", es.ucm.fdi.ici.c2627.practica3.GIRM_OGA_LIN_LING.Ghosts::new);
         // RIVALES_PACMANS.put("P3 nuestra", es.ucm.fdi.ici.c2627.practica3.GIRM_OGA_LIN_LING.MsPacMan::new);
@@ -60,7 +64,7 @@ public class Comparar {
     static final int PARTIDAS = 300;          // por versión y rival; no lo cambiéis entre versiones
     static final long SEMILLA = 1;            // la partida i usa la semilla SEMILLA + i
     static final int LIMITE_TURNOS = 4000;    // el mismo que el Executor
-    static final int HILOS = Runtime.getRuntime().availableProcessors();
+    static final int HILOS = 2;
     static final AtomicInteger hechas = new AtomicInteger();   // para ir viendo el progreso
 
     public static void main(String[] args) throws Exception {
@@ -112,9 +116,14 @@ public class Comparar {
 
         System.out.printf("%n%d partidas por versión y rival, semillas %d a %d, comparando %s.%n",
                 PARTIDAS, SEMILLA, SEMILLA + PARTIDAS - 1, COMPARO_FANTASMAS ? "fantasmas" : "Ms. Pac-Man");
-        for (int m = 0; m < METRICAS.size(); m++)
+        for (int m = 0; m < METRICAS.size(); m++) {
             for (int i = 1; i < versiones.size(); i++)
                 tabla(m, versiones.get(i - 1), versiones.get(i), rivales, stats);
+            if (COMPARO_FANTASMAS && versiones.containsAll(List.of("v1", "v4")) && versiones.indexOf("v4") - versiones.indexOf("v1") > 1)
+                tabla(m, "v1", "v4", rivales, stats);
+            if (COMPARO_FANTASMAS && versiones.containsAll(List.of("v0", "v4")))
+                tabla(m, "v0", "v4", rivales, stats);
+        }
     }
 
     /** Juega las partidas [desde, hasta) de una versión contra un rival. Una fila por partida. */
