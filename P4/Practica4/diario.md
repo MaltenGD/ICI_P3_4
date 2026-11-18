@@ -618,3 +618,11 @@ v4 es mejor contra 0 rivales, peor contra 0 y no se distingue contra 3.
 ### Elección para el concurso
 
 Se elige **v4**.
+
+---
+
+# Elección final para el concurso
+
+- **Ms. Pac-Man:** Se envía **v2** (mspacman-v2.fcl) porque supera a v0 (+1.487 pts) y a v1 (+853 pts) al gestionar el acoso múltiple y racionar las Power Pills.
+- **Ghosts:** Se envía **v4** (ghosts-v4.fcl) porque minimiza los puntos concedidos a Pac-Man (4.810 pts, -321 frente a v2) y reduce los fantasmas comidos a 5,68.
+
