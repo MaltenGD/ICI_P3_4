@@ -21,6 +21,7 @@ from grupoYY.minimax import Minimax
 #     "ab2-centro": lambda: Minimax(evaluar=evaluar_centro),
 VERSIONES = {
     "mcts": lambda: MCTS(),
+    "mcts-centro": lambda: MCTS(recompensa=evaluar_centro),
     "ab2": lambda: Minimax(profundidad=2),
 }
 
