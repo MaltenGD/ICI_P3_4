@@ -30,6 +30,12 @@ Empezamos la práctica mirando la wiki y lo que venía en el proyecto de partida
 * M5 : Retropropagación
 * M6 : El bucle
 
+```
+                          Aleatorio                 Voraz             AlfaBeta2         TOTAL
+mcts               100% ±0 (16-0-0)      88% ±14 (13-2-1)        0% ±0 (0-0-16)       62% ±14
+mcts-centro        100% ±0 (16-0-0)       94% ±9 (14-2-0)       9% ±14 (1-1-14)       68% ±13
+ab2                 97% ±6 (15-1-0)       94% ±9 (14-2-0)       59% ±21 (7-5-4)        83% ±9
+```
 ### Uso de IA y Prompts (Sesión 1)
 - No se uso IA para estos apartados
 

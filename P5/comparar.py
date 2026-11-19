@@ -13,6 +13,7 @@ import chess
 from ajedrez import AlfaBeta, Aleatorio, Voraz, jugar, puntos
 from grupoYY.mcts import MCTS
 from grupoYY.minimax import Minimax
+from grupoYY.mcts import MCTS, evaluar_centro
 
 # Cada versión, con un nombre corto. Una función que crea el jugador (por eso el lambda).
 # Para probar un parámetro, la misma clase con otro valor; para probar una heurística, la vuestra:
