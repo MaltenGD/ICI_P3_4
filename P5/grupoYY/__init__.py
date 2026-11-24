@@ -1,9 +1,6 @@
-"""El paquete de vuestro grupo. Cambiad YY por vuestra letra en el nombre de la carpeta."""
-from .mcts import MCTS
-from .minimax import Minimax
+"""Alias de compatibilidad para grupoYY redirigido a grupoGIRM_OGA_LIN_LING."""
+import sys
+from grupoGIRM_OGA_LIN_LING import *
+import grupoGIRM_OGA_LIN_LING as _g
 
-
-def jugador():
-    """La versión que entregáis como la vuestra: sin argumentos, y con el nombre de vuestro grupo.
-    Puede ser un MCTS, un Minimax o lo vuestro: lo que mejor os haya ido en comparar.py."""
-    return MCTS(nombre="grupoYY")
+jugador = _g.jugador

@@ -2,8 +2,8 @@
 (en VS Code, "Ver partida" en Ejecutar y depurar)."""
 from ajedrez import AlfaBeta, Aleatorio, Voraz
 from ajedrez.ventana import ver
-from grupoYY.mcts import MCTS
-from grupoYY.minimax import Minimax
+from grupoGIRM_OGA_LIN_LING.mcts import MCTS
+from grupoGIRM_OGA_LIN_LING.minimax import Minimax
 
 # Con el proyecto recién descargado, dos rivales de referencia. Cuando tengáis los pasos hechos,
 # poned los vuestros: MCTS(), Minimax(profundidad=2), u otra versión.

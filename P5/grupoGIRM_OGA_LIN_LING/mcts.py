@@ -13,7 +13,7 @@ import time
 import chess
 
 from ajedrez import material
-from grupoYY.minimax import MATE, evaluar
+from .minimax import MATE, evaluar
 
 CENTRO = [chess.D4, chess.E4, chess.D5, chess.E5]
 
@@ -80,7 +80,7 @@ class MCTS:
     """El jugador. `c` es la constante de exploración, `profundidad` el corte de la simulación,
     `recompensa` la heurística, e `iteraciones`, si no es None, sustituye al reloj (para las pruebas)."""
 
-    def __init__(self, nombre="grupoYY", c=1.4, profundidad=10, iteraciones=None, recompensa=recompensa):
+    def __init__(self, nombre="grupoGIRM_OGA_LIN_LING", c=1.4, profundidad=10, iteraciones=None, recompensa=recompensa):
         self.nombre = nombre
         self.c = c
         self.profundidad = profundidad
@@ -144,3 +144,75 @@ def evaluar_centro(tablero, color):
     if abs(v) == MATE:
         return v
     return v + 0.1 * centro(tablero, color)
+
+
+# =============================================================================
+# RETOS (Práctica 5 - Cuarta parte)
+# =============================================================================
+
+class MCTSRival(MCTS):
+    """Reto 1: El rival también elige (+2,5 pts · Violeta · MCTS).
+    
+    En los niveles del árbol en los que mueve el rival (nodo.color == self.yo),
+    la selección UCB1 evalúa (1 - media) en vez de la media, asumiendo que el
+    rival intentará perjudicarnos en vez de colaborar con nosotros.
+    """
+
+    def __init__(self, nombre="grupoGIRM_OGA_LIN_LING-rival", **kwargs):
+        super().__init__(nombre=nombre, **kwargs)
+
+    def seleccionar(self, nodo):
+        elige_rival = (nodo.color == self.yo)
+        log_n = math.log(nodo.visitas)
+        c = self.c
+
+        def puntos(hijo):
+            media = hijo.valor / hijo.visitas
+            if elige_rival:
+                media = 1.0 - media
+            explorar = c * math.sqrt(log_n / hijo.visitas)
+            return media + explorar
+
+        return max(nodo.hijos, key=puntos)
+
+
+class MCTSCapturas(MCTS):
+    """Reto 3: Simulaciones que capturan (+2,5 pts · Violeta · MCTS).
+    
+    Durante la simulación (rollout), si hay capturas legales disponibles,
+    elige al azar entre las capturas en vez de jugar ciegamente. Evita que las
+    simulaciones ignoren piezas colgadas y damas regaladas.
+    """
+
+    def __init__(self, nombre="grupoGIRM_OGA_LIN_LING-capturas", **kwargs):
+        super().__init__(nombre=nombre, **kwargs)
+
+    def simular(self, tablero):
+        for _ in range(self.profundidad):
+            jugadas = list(tablero.legal_moves)
+            if not jugadas:
+                break
+            capturas = [j for j in jugadas if tablero.is_capture(j)]
+            tablero.push(random.choice(capturas if capturas else jugadas))
+        return self.recompensa(tablero, self.yo)
+
+
+class MCTSRivalCapturas(MCTSRival):
+    """Combinación de Reto 1 + Reto 3 (MCTS Táctico Completo).
+    
+    Hereda la selección adversarial de MCTSRival (1 - media para el rival)
+    y añade la simulación informada de capturas de MCTSCapturas.
+    """
+
+    def __init__(self, nombre="grupoGIRM_OGA_LIN_LING-rival-capturas", **kwargs):
+        super().__init__(nombre=nombre, **kwargs)
+
+    def simular(self, tablero):
+        for _ in range(self.profundidad):
+            jugadas = list(tablero.legal_moves)
+            if not jugadas:
+                break
+            capturas = [j for j in jugadas if tablero.is_capture(j)]
+            tablero.push(random.choice(capturas if capturas else jugadas))
+        return self.recompensa(tablero, self.yo)
+

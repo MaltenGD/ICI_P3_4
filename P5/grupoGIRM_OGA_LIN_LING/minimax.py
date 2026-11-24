@@ -75,7 +75,7 @@ class Minimax:
     """El jugador. `profundidad` son las medias jugadas que mira, contando la suya; con
     `poda=False` usa minimax a secas (para comparar lo que tardan); `evaluar` es la heurística."""
 
-    def __init__(self, nombre="grupoYY-ab", profundidad=2, poda=True, evaluar=evaluar):
+    def __init__(self, nombre="grupoGIRM_OGA_LIN_LING-ab", profundidad=2, poda=True, evaluar=evaluar):
         self.nombre = nombre
         self.profundidad = profundidad
         self.poda = poda

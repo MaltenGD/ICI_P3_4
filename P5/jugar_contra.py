@@ -3,8 +3,8 @@
 import chess
 
 from ajedrez.ventana import Humano, ver
-from grupoYY.mcts import MCTS
-from grupoYY.minimax import Minimax
+from grupoGIRM_OGA_LIN_LING.mcts import MCTS
+from grupoGIRM_OGA_LIN_LING.minimax import Minimax
 
 COLOR = chess.WHITE     # el vuestro
 TIEMPO = 2.0            # lo que piensa el MCTS (Minimax mira su profundidad, tarde lo que tarde)

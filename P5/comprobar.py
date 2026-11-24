@@ -14,9 +14,9 @@ import time
 import chess
 
 from ajedrez import Aleatorio, jugar, puntos
-from grupoYY import mcts, minimax
-from grupoYY.mcts import MCTS, Nodo
-from grupoYY.minimax import MATE, Minimax
+from grupoGIRM_OGA_LIN_LING import mcts, minimax
+from grupoGIRM_OGA_LIN_LING.mcts import MCTS, Nodo
+from grupoGIRM_OGA_LIN_LING.minimax import MATE, Minimax
 
 MATE_BLANCAS = "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3"   # mate del loco
 AHOGADO = "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1"

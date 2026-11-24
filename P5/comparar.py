@@ -11,25 +11,22 @@ from concurrent.futures import ProcessPoolExecutor
 import chess
 
 from ajedrez import AlfaBeta, Aleatorio, Voraz, jugar, puntos
-from grupoYY.mcts import MCTS
-from grupoYY.minimax import Minimax
-from grupoYY.mcts import MCTS, evaluar_centro
+from grupoGIRM_OGA_LIN_LING.mcts import MCTS, MCTSRival, MCTSCapturas, MCTSRivalCapturas, evaluar_centro
+from grupoGIRM_OGA_LIN_LING.minimax import Minimax
 
 # Cada versión, con un nombre corto. Una función que crea el jugador (por eso el lambda).
-# Para probar un parámetro, la misma clase con otro valor; para probar una heurística, la vuestra:
-#     "mcts-c07": lambda: MCTS(c=0.7),
-#     "ab3": lambda: Minimax(profundidad=3),
-#     "ab2-centro": lambda: Minimax(evaluar=evaluar_centro),
 VERSIONES = {
     "mcts": lambda: MCTS(),
-    "mcts-centro": lambda: MCTS(recompensa=evaluar_centro),
-    "ab2": lambda: Minimax(profundidad=2),
+    "mcts-rival": lambda: MCTSRival(),
+    "mcts-capturas": lambda: MCTSCapturas(),
+    "mcts-comb": lambda: MCTSRivalCapturas(),
 }
 
 RIVALES = {
     "Aleatorio": lambda: Aleatorio(),
     "Voraz": lambda: Voraz(),
     "AlfaBeta2": lambda: AlfaBeta(2),
+    "MCTS guia": lambda: MCTS(),
 }
 
 # Cada apertura se juega dos veces contra cada rival: una con blancas y otra con negras.
@@ -46,7 +43,7 @@ APERTURAS = {
 
 TIEMPO = 0.3          # segundos por jugada
 MAX_MEDIAS = 120      # medias jugadas desde la apertura; después decide el material
-PROCESOS = max(1, (os.cpu_count() or 2) // 2)
+PROCESOS = min(12, os.cpu_count() or 4)
 
 
 def fen_de(sans):
