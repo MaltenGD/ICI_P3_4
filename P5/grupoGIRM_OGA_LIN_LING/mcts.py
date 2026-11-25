@@ -13,7 +13,7 @@ import time
 import chess
 
 from ajedrez import material
-from .minimax import MATE, evaluar
+from .minimax import MATE, evaluar, alfabeta
 
 CENTRO = [chess.D4, chess.E4, chess.D5, chess.E5]
 
@@ -216,3 +216,20 @@ class MCTSRivalCapturas(MCTSRival):
             tablero.push(random.choice(capturas if capturas else jugadas))
         return self.recompensa(tablero, self.yo)
 
+# Un híbrido
+class MCTSAlfaBeta(MCTS):
+    """Reto: Un híbrido MCTS + Alfa-Beta."""
+
+    def __init__(self, profundidad_ab=2, **kwargs):
+        super().__init__(**kwargs)
+        self.profundidad_ab = profundidad_ab
+
+    def simular(self, tablero):
+        valor = alfabeta(tablero, self.profundidad_ab, self.yo)
+
+        if valor == MATE:
+            return 1.0
+        if valor == -MATE:
+            return 0.0
+
+        return 1 / (1 + math.exp(-valor / 3))

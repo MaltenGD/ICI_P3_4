@@ -11,7 +11,7 @@ from concurrent.futures import ProcessPoolExecutor
 import chess
 
 from ajedrez import AlfaBeta, Aleatorio, Voraz, jugar, puntos
-from grupoGIRM_OGA_LIN_LING.mcts import MCTS, MCTSRival, MCTSCapturas, MCTSRivalCapturas, evaluar_centro
+from grupoGIRM_OGA_LIN_LING.mcts import MCTS, MCTSRival, MCTSCapturas, MCTSRivalCapturas, MCTSAlfaBeta, evaluar_centro
 from grupoGIRM_OGA_LIN_LING.minimax import Minimax
 
 # Cada versión, con un nombre corto. Una función que crea el jugador (por eso el lambda).
@@ -20,6 +20,8 @@ VERSIONES = {
     "mcts-rival": lambda: MCTSRival(),
     "mcts-capturas": lambda: MCTSCapturas(),
     "mcts-comb": lambda: MCTSRivalCapturas(),
+    "mcts-ab1": lambda: MCTSAlfaBeta(profundidad_ab=1),
+    "mcts-ab2": lambda: MCTSAlfaBeta(profundidad_ab=2),
 }
 
 RIVALES = {

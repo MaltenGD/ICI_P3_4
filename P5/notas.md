@@ -39,6 +39,25 @@ mcts-comb            100% ±0 (16-0-0)       66% ±22 (9-3-4)        3% ±6 (0-1
 - **Qué se probó:** Clase `MCTSCapturas(MCTS)` redefiniendo `simular`: durante las jugadas aleatorias del rollout, si hay capturas legales (`tablero.is_capture(j)`), se elige al azar únicamente entre ellas para evitar ignorar piezas colgadas.
 - **Resultado en `comparar.py`:** Baja al 47% global (28% contra `MCTS guia` y 59% contra Voraz) debido a que forzar cualquier captura indiscriminada incita a entregar piezas pesadas en capturas venenosas (por ejemplo comer un peón defendido con la dama). Sin embargo, combinada en `mcts-comb`, fue la única variante de MCTS capaz de arañar tablas a `AlfaBeta2` (3% ±6).
 
+### Reto 4: Un híbrido
+- **Qué se probó:** Clase `MCTSAlfaBeta(MCTS)`, redefiniendo `simular` para sustituir las simulaciones aleatorias por una evaluación mediante poda Alfa-Beta. Después de cada expansión, se evalúa la posición con Alfa-Beta a profundidad 1 o 2, y, se transforma el valor material obtenido mediante M1: 1 / (1 + exp(-valor / 3)). De esta forma, MCTS combina su exploración del árbol con una evaluación táctica más precisa.
+- **Resultado en comparar.py:** Se realizaron 384 partidas, enfrentando las distintas variantes contra los cuatro rivales, con ocho aperturas y ambos colores.
+
+
+
+384 partidas, 12 procesos, 0.3 s por jugada: hasta 10 minutos.
+384/384 partidas  (9.3 min)
+Puntos (victoria 1, tablas ½) y, entre paréntesis, ganadas-tablas-perdidas.
+±: dos errores típicos. Si los intervalos de dos versiones se solapan mucho, no hay diferencia clara.
+
+                            Aleatorio                 Voraz             AlfaBeta2             MCTS guia         TOTAL
+mcts                 100% ±0 (16-0-0)      78% ±18 (11-3-2)        0% ±0 (0-0-16)       41% ±25 (6-1-9)       55% ±12
+mcts-rival           100% ±0 (16-0-0)      88% ±17 (14-0-2)       6% ±12 (1-0-15)       50% ±26 (8-0-8)       61% ±12
+mcts-capturas        94% ±12 (15-0-1)       62% ±23 (9-2-5)        0% ±0 (0-0-16)      16% ±18 (2-1-13)       43% ±12
+mcts-comb            100% ±0 (16-0-0)      78% ±18 (11-3-2)        6% ±9 (0-2-14)      34% ±24 (5-1-10)       55% ±12
+mcts-ab1             100% ±0 (16-0-0)      69% ±22 (10-2-4)        3% ±6 (0-1-15)      28% ±20 (3-3-10)       50% ±12
+mcts-ab2             100% ±0 (16-0-0)      25% ±20 (3-2-11)       6% ±12 (1-0-15)      25% ±20 (3-2-11)       39% ±12
+
 ---
 
 ## 4. Jugador final
