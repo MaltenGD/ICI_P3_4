@@ -43,13 +43,9 @@ mcts-comb            100% ±0 (16-0-0)       66% ±22 (9-3-4)        3% ±6 (0-1
 - **Qué se probó:** Clase `MCTSAlfaBeta(MCTS)`, redefiniendo `simular` para sustituir las simulaciones aleatorias por una evaluación mediante poda Alfa-Beta. Después de cada expansión, se evalúa la posición con Alfa-Beta a profundidad 1 o 2, y, se transforma el valor material obtenido mediante M1: 1 / (1 + exp(-valor / 3)). De esta forma, MCTS combina su exploración del árbol con una evaluación táctica más precisa.
 - **Resultado en comparar.py:** Se realizaron 384 partidas, enfrentando las distintas variantes contra los cuatro rivales, con ocho aperturas y ambos colores.
 
-
-
+```
 384 partidas, 12 procesos, 0.3 s por jugada: hasta 10 minutos.
 384/384 partidas  (9.3 min)
-Puntos (victoria 1, tablas ½) y, entre paréntesis, ganadas-tablas-perdidas.
-±: dos errores típicos. Si los intervalos de dos versiones se solapan mucho, no hay diferencia clara.
-
                             Aleatorio                 Voraz             AlfaBeta2             MCTS guia         TOTAL
 mcts                 100% ±0 (16-0-0)      78% ±18 (11-3-2)        0% ±0 (0-0-16)       41% ±25 (6-1-9)       55% ±12
 mcts-rival           100% ±0 (16-0-0)      88% ±17 (14-0-2)       6% ±12 (1-0-15)       50% ±26 (8-0-8)       61% ±12
@@ -57,6 +53,79 @@ mcts-capturas        94% ±12 (15-0-1)       62% ±23 (9-2-5)        0% ±0 (0-0
 mcts-comb            100% ±0 (16-0-0)      78% ±18 (11-3-2)        6% ±9 (0-2-14)      34% ±24 (5-1-10)       55% ±12
 mcts-ab1             100% ±0 (16-0-0)      69% ±22 (10-2-4)        3% ±6 (0-1-15)      28% ±20 (3-3-10)       50% ±12
 mcts-ab2             100% ±0 (16-0-0)      25% ±20 (3-2-11)       6% ±12 (1-0-15)      25% ±20 (3-2-11)       39% ±12
+```
+
+
+### Reto 2: Gestionar el tiempo (+1,75 pts · Azul · MCTS)
+- **Qué se probó:** 
+    * Clase `MCTS` cambios en `elegir`: si solo hay una jugada legal se devuelve sin crear el árbol. Dentro del bucle, cada cierto número de iteraciones se estima cuántas caben en el tiempo que queda (iteraciones/s × tiempo restante) y se para si `visitas de la segunda + caben < 0,9 × visitas de la primera`, porque la jugada ya está decidida. Se añadió la opción `parada=True/False` para comparar con y sin la regla.
+    * Clase `Minimax` cambios en `elegir`: también devuelve directamente la jugada única. La regla de subir profundidad con 10 o menos piezas se probó primero tal cual (+1 con ≤16 piezas, +2 con ≤10), pero algunas jugadas tardaban de 0,5 a 2,6 s con 0,3 s de reloj, superando 1,5 veces el tiempo (pérdida de partida). Se sustituyó por **profundización iterativa con reloj**: se busca a profundidad 1, 2, 3… hasta gastar el 60 % del tiempo y se juega con la última profundidad completada. Así los finales, con pocas jugadas, llegan más hondo de forma natural sin pasarse.
+
+- **Resultado en `comparar.py`:**  Se corrieron las versiones: MTCS sin y con las reglas junto con minimax.
+
+```
+192 partidas, 12 procesos, 0.3 s por jugada: hasta 5 minutos.
+
+160/192 partidasOJO: grupoGIRM_OGA_LIN_LING-ab ha tardado 0.52 s y tenía 0.3 s
+161/192 partidasOJO: grupoGIRM_OGA_LIN_LING-ab ha tardado 0.65 s y tenía 0.3 s
+162/192 partidasOJO: grupoGIRM_OGA_LIN_LING-ab ha tardado 0.69 s y tenía 0.3 s
+OJO: grupoGIRM_OGA_LIN_LING-ab ha tardado 0.51 s y tenía 0.3 s
+OJO: grupoGIRM_OGA_LIN_LING-ab ha tardado 0.60 s y tenía 0.3 s
+OJO: grupoGIRM_OGA_LIN_LING-ab ha tardado 0.52 s y tenía 0.3 s
+192/192 partidas  (4.3 min)
+
+Puntos (victoria 1, tablas ½) y, entre paréntesis, ganadas-tablas-perdidas.
+±: dos errores típicos. Si los intervalos de dos versiones se solapan mucho, no hay diferencia clara.
+
+                            Aleatorio                 Voraz             AlfaBeta2             MCTS guia         TOTAL
+mcts                100% ±0 (16-0-0)       41% ±21 (4-5-7)        0% ±0 (0-0-16)       56% ±26 (9-0-7)       49% ±12
+mcts-sinparada      100% ±0 (16-0-0)       47% ±21 (5-5-6)        0% ±0 (0-0-16)       56% ±22 (7-4-5)       51% ±12
+minimax             100% ±0 (16-0-0)      100% ±0 (16-0-0)       47% ±23 (6-3-7)       97% ±6 (15-1-0)        86% ±8
+```
+
+**Conclusión:**
+* `mcts` (con parada) 49 % ±12 frente a `mcts-sinparada` 51 % ±12: los intervalos se solapan, así que **la parada no cambia los puntos**. Con 0,3 s por jugada casi nunca se dispara; se notaría más con 1 s o más.
+* `minimax` con iterativa llega al 86 % ±8 (100 % contra Voraz, 97 % contra `MCTS guia`, 47 % contra `AlfaBeta2`).
+* La pasada con el +1/+2 fijo produjo decenas de avisos `OJO` (hasta 2,65 s). Con la iterativa solo quedan 6 en 192 partidas (0,51-0,69 s), porque el reloj se comprueba entre jugadas raíz y una llamada puede empezar justo antes de agotarse.
+* Duración: 4,3 min con 3 versiones (192 partidas).
+
+**Resultado en `comparar.py`:** 64 partidas por versión, dos pasadas separadas por cada tiempo:
+
+| Tiempo/jugada | Versión | Minutos | Voraz | MCTS guía | TOTAL |
+|---|---|---|---|---|---|
+| 0,3 s | `mcts` (con parada) | 1,8 | 12 % ±14 | 53 % ±25 | 41 % ±12 |
+| 0,3 s | `mcts-sinparada` | 1,9 | 53 % ±23 | 69 % ±22 | 55 % ±12 |
+| 1,0 s | `mcts` (con parada) | 5,5 | 84 % ±18 | 50 % ±26 | 59 % ±12 |
+| 1,0 s | `mcts-sinparada` | 6,3 | 84 % ±18 | 50 % ±26 | 59 % ±12 |
+
+* **Tiempo:** a 0,3 s la parada apenas ahorra (1,8 frente a 1,9 min) porque casi nunca se dispara. A 1 s ahorra unos 0,8 min (5,5 frente a 6,3), alrededor de un 13 %.
+* **Puntos:** a 1 s son idénticos (59 % ±12 en ambos). A 0,3 s la versión con parada sacó menos (41 % frente a 55 %), pero en una pasada anterior de 192 partidas la diferencia era nula (49 % frente a 51 %), así que lo atribuimos al ruido de usar solo 64 partidas.
+
+* **Conclusión:** la parada ahorra tiempo sin perder fuerza, y el ahorro crece con el tiempo por jugada, porque hay más iteraciones y la estimación de las que caben es más fiable. Contra `AlfaBeta2` el MCTS sigue en 0 % con y sin parada, así que eso no depende de la gestión del tiempo.
+
+### Reto 5: Profundización iterativa (+2,5 pts · Morado · Alfa-beta)
+
+- **Qué se probó:** 
+    * Clase `MinimaxIterativo` cambios en `elegir`: Se reescribió el método `elegir` para buscar a profundidad 1, 2, 3... hasta agotar el tiempo. Se introdujeron tres mejoras clave:
+
+        * **Chequeo de tiempo dentro del bucle**: Comprobar el reloj al evaluar cada jugada (no al final de la profundidad) para abortar limpiamente si se agota el tiempo.
+
+        * **Ordenación total por valor**: Ordenar todas las jugadas de la iteración anterior de mejor a peor. Esto multiplica la eficiencia de la poda Alfa-Beta (salto del 45% al 84% vs Minimax2).
+
+        * **Margen del 92% + Factor 6**: El 95% provocaba abortos por latencia (bajón al 23%). El 92% con factor 6 maximiza el tiempo útil sin generar avisos OJO.
+
+**Resultado en `comparar.py`:** Se corrieron las versiones con diferentes configuraciones de tiempo y márgenes. La siguiente tabla muestra la evolución del rendimiento a lo largo de las pruebas (32 partidas, 12 procesos, 1.0 s por jugada):
+
+```
+Versión / Cambio	        Margen	Factor	Puntos vs Minimax2	Puntos vs Minimax3	TOTAL
+Iterativo (1er intento)	    80%	    10	    66% ±20	            38% ±21	            52% ±15
+Iterativo (margen 85%)	    85%	    10	    72% ±20	            19% ±18	            45% ±16
+Iterativo (margen 95%)	    95% 	10	    41% ±23	            6% ±9	            23% ±13
+Iterativo (orden total) 	90%	    10	    84% ±18	            16% ±15	            50% ±17
+Iterativo (final)	        92%	    6	    91% ±10	            31% ±22	            61% ±16
+```
+
+**Conclusión:** Pasamos del 23% al 61% global (91% vs Minimax2). La ordenación total es la clave. Contra Minimax3 (31%) seguimos en desventaja porque el rival se salta el límite de tiempo (1.83s vs 1.0s) y busca más profundo. Para ganarle, el siguiente paso obligatorio es mejorar la función evaluar con valor posicional.
 
 ---
 

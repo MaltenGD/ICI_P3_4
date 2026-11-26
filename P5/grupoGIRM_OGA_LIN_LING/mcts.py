@@ -80,13 +80,14 @@ class MCTS:
     """El jugador. `c` es la constante de exploración, `profundidad` el corte de la simulación,
     `recompensa` la heurística, e `iteraciones`, si no es None, sustituye al reloj (para las pruebas)."""
 
-    def __init__(self, nombre="grupoGIRM_OGA_LIN_LING", c=1.4, profundidad=10, iteraciones=None, recompensa=recompensa):
+    def __init__(self, nombre="grupoGIRM_OGA_LIN_LING", c=1.4, profundidad=10, iteraciones=None, recompensa=recompensa, parada=True):
         self.nombre = nombre
         self.c = c
         self.profundidad = profundidad
         self.iteraciones = iteraciones
         self.recompensa = recompensa    # la heurística: otra función con la misma forma, para probar la vuestra
         self.estadisticas = []      # (jugada, visitas, valor medio) de la raíz: la ventana las pinta
+        self.parada = parada
 
     # Las cuatro fases, como métodos. Una versión nueva hereda de MCTS y redefine sólo la que cambia:
     #     class MCTSCapturas(MCTS):
@@ -104,11 +105,29 @@ class MCTS:
         retropropagar(nodo, r)
 
     def elegir(self, tablero, tiempo):
+        """Reto 2: Gestionar el tiempo (+1,75 pts · Azul · MCTS)
+            
+        Una sola jugada legal : devolvedla sin pensar.
+        """
+        if(self.parada):
+            legales = list(tablero.legal_moves)
+            if len(legales) == 1:
+                self.estadisticas = []
+                self.iteraciones_hechas = 0
+                return legales[0]
+        """===================================="""
+
         fin = time.perf_counter() + tiempo * 0.9    # un margen para no pasarse
         self.yo = tablero.turn                      # el que decide: el árbol entero cuenta desde él
         raiz = Nodo(tablero)
         n = 0
         # el bucle de elegir, sin el raise (allí va con dos sangrías más)
+
+
+        """ MCTS — parar si la segunda no alcanza a la primera"""
+        # nuevo: para medir el tiempo de la búsqueda, no del resto de la función
+        inicio = time.perf_counter()    
+
         while True:
             t = tablero.copy(stack=False)
             nodo = raiz
@@ -120,6 +139,21 @@ class MCTS:
             r = self.simular(t)                              # 3. simulación
             self.retropropagar(nodo, r)                      # 4. retropropagación
             n += 1
+
+            #================================
+            # Si la segunda jugada más visitada no puede superar a la 
+            # primera aunque todas las iteraciones restantes fueran para ella, cortamos.
+            if self.parada and len(raiz.hijos) >= 2 and (n < 200 or n % max(20, n // 20) == 0):
+                orden = sorted(raiz.hijos, key=lambda h: -h.visitas)
+                segunda = orden[1].visitas
+                primera = orden[0].visitas
+                transcurrido = time.perf_counter() - inicio
+                ritmo = n / max(transcurrido, 1e-6)                 # iteraciones por segundo
+                restantes = ritmo * max(0.0, fin - time.perf_counter())
+                if segunda + restantes < 0.9 * primera:
+                    break
+            #================================
+
             if (self.iteraciones and n >= self.iteraciones) or \
             (not self.iteraciones and time.perf_counter() > fin):
                 break

@@ -13,22 +13,28 @@ import chess
 from ajedrez import AlfaBeta, Aleatorio, Voraz, jugar, puntos
 from grupoGIRM_OGA_LIN_LING.mcts import MCTS, MCTSRival, MCTSCapturas, MCTSRivalCapturas, MCTSAlfaBeta, evaluar_centro
 from grupoGIRM_OGA_LIN_LING.minimax import Minimax
+from grupoGIRM_OGA_LIN_LING.minimax import Minimax, MinimaxIterativo
 
 # Cada versión, con un nombre corto. Una función que crea el jugador (por eso el lambda).
 VERSIONES = {
-    "mcts": lambda: MCTS(),
-    "mcts-rival": lambda: MCTSRival(),
-    "mcts-capturas": lambda: MCTSCapturas(),
-    "mcts-comb": lambda: MCTSRivalCapturas(),
-    "mcts-ab1": lambda: MCTSAlfaBeta(profundidad_ab=1),
-    "mcts-ab2": lambda: MCTSAlfaBeta(profundidad_ab=2),
+    # "mcts": lambda: MCTS(),
+    # "mcts-rival": lambda: MCTSRival(),
+    # "mcts-capturas": lambda: MCTSCapturas(),
+    # "mcts-comb": lambda: MCTSRivalCapturas(),
+    # "mcts-ab1": lambda: MCTSAlfaBeta(profundidad_ab=1),
+    # "mcts-ab2": lambda: MCTSAlfaBeta(profundidad_ab=2),
+    # "minimax": lambda: Minimax(),
+
+    "iterativo": lambda: MinimaxIterativo(),
 }
 
 RIVALES = {
-    "Aleatorio": lambda: Aleatorio(),
-    "Voraz": lambda: Voraz(),
-    "AlfaBeta2": lambda: AlfaBeta(2),
-    "MCTS guia": lambda: MCTS(),
+    # "Aleatorio": lambda: Aleatorio(),
+    # "Voraz": lambda: Voraz(),
+    # "AlfaBeta2": lambda: AlfaBeta(2),
+    # "MCTS guia": lambda: MCTS(),
+    "Minimax2": lambda: Minimax(profundidad=2, nombre="minimax2"),
+    "Minimax3": lambda: Minimax(profundidad=3, nombre="minimax3"),
 }
 
 # Cada apertura se juega dos veces contra cada rival: una con blancas y otra con negras.
@@ -43,7 +49,7 @@ APERTURAS = {
     "Inglesa": "c4 e5 Nc3 Nf6",
 }
 
-TIEMPO = 0.3          # segundos por jugada
+TIEMPO = 1.0          # segundos por jugada
 MAX_MEDIAS = 120      # medias jugadas desde la apertura; después decide el material
 PROCESOS = min(12, os.cpu_count() or 4)
 
